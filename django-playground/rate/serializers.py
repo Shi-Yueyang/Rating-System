@@ -1,45 +1,27 @@
 from rest_framework import serializers
-from .models import Event, User, Resource, Criteria, Aspect, Task, UserTask
+from .models import Event, Resource, Aspect, User, UserScore
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ['id', 'name', 'dueDate']
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id', 'name', 'dueDate', 'resources', 'aspects']  # Including reverse relations
 
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
-        fields = ['id', 'file_url', 'event']
+        fields = ['id', 'file_url', 'event', 'users']
 
 class AspectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aspect
-        fields = ['id', 'description', 'percentage', 'criteria']
+        fields = ['id', 'description', 'percentage', 'event']
 
-class CriteriaSerializer(serializers.ModelSerializer):
-    aspects = AspectSerializer(many=True, read_only=True)
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Criteria
-        fields = ['id', 'name', 'event', 'aspects']
+        model = User
+        fields = ['id', 'username', 'email', 'resource', 'user_scores']
 
-class TaskSerializer(serializers.ModelSerializer):
-    resource = ResourceSerializer(read_only=True)
-    criteria = CriteriaSerializer(read_only=True)
-
+class UserScoreSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Task
-        fields = ['id', 'resource', 'criteria', 'event']
-
-class UserTaskSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    task = TaskSerializer(read_only=True)
-
-    class Meta:
-        model = UserTask
-        fields = ['id', 'user', 'task', 'score', 'feedback']
+        model = UserScore
+        fields = ['id', 'user', 'resource', 'aspect', 'score']
