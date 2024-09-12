@@ -1,11 +1,6 @@
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
-import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-
 import AssignmentCard, { Assignment, AssignmentStatus } from '@/components/dashboard/assignments/assignments-card';
 
 const assignments: Assignment[] = [
