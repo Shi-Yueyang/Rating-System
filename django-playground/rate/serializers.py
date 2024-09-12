@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Event, Resource, Aspect, User, UserScore
-
+from django.core.exceptions import ValidationError
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -28,4 +28,23 @@ class EventSerializer(serializers.ModelSerializer):
 class UserScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserScore
-        fields = ['id', 'user', 'resource', 'aspect','event', 'score']
+        fields = ['id', 'user', 'resource', 'aspect', 'score']
+
+    def create(self, validated_data):
+        try:
+            instance = UserScore(**validated_data)
+            instance.clean()
+            instance.save()
+            return instance
+        except ValidationError as e:
+            raise serializers.ValidationError(e.message)
+    
+    def update(self, instance, validated_data):
+        try:
+            for attr,value in validated_data.items():
+                setattr(instance,attr,value)
+            instance.clean()
+            instance.save()
+            return instance
+        except ValidationError as e:
+            raise serializers.ValidationError(e.message)
