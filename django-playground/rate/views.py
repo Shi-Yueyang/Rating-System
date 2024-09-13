@@ -1,12 +1,26 @@
 from rest_framework import viewsets
 from .models import Event, Resource, Aspect, User, UserScore
-from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer, UserScoreSerializer
+from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return EventSerializer  
+        return EventSimpleSerializer
+        
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        user_id = self.request.query_params.get('user_id')
+        if user_id:
+            try:
+                user = User.objects.get(pk=user_id)
+                queryset = queryset.filter(resources__user_scores__user_id=user_id)
+            except User.DoesNotExist:
+                raise NotFound(detail='User not found')    
+        return queryset.distinct()
+
 
 class ResourceViewSet(viewsets.ModelViewSet):
     serializer_class = ResourceSerializer
@@ -18,7 +32,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
         if user_id:
             try:
                 user = User.objects.get(pk=user_id)
-                queryset = queryset.filter(user_score__user=user)
+                queryset = queryset.filter(user_scores__user=user)
             except User.DoesNotExist:
                 raise NotFound(detail='User not found')
         if event_id:

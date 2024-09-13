@@ -25,6 +25,11 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ['id', 'name', 'dueDate','aspects','resources'] 
 
+class EventSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['id','name','dueDate']
+
 class UserScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserScore
