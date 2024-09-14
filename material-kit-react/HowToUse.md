@@ -1,3 +1,4 @@
+# How to
 ## Add new nav bar item
 - create a new folder in src/app/dashboard, and create a component in it
 ```
@@ -44,5 +45,29 @@ export const navItems = [
   { key: 'error', title: 'Error', href: paths.errors.notFound, icon: 'x-square' },
   { key: 'test', title: 'Test', href: paths.dashboard.test, icon: 'chart-pie' }, // newly added
 ] satisfies NavItemConfig[];
+
+```
+## Fetch data from backend
+- In the root layout.tsx ( src/app/layout.tsx )
+  - Mark it as client component
+  - Use QueryClient and QueryClientProvider
+  - Wrap everything inside a QueryClientProvider
+```ts
+
+"use client";
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+const [queryClient] = useState(() => new QueryClient());
+
+// ...
+
+return (
+// ...
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+// ...
+);
+
 
 ```
