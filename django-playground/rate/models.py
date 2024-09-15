@@ -1,14 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 
 class Event(models.Model):
     name = models.CharField(max_length=255, unique=True)
     dueDate = models.DateField()
 
-class User(models.Model):
-    username = models.CharField(max_length=255, unique=True)
-    email = models.EmailField()
 
 class Resource(models.Model):
     file_url = models.URLField()
@@ -21,7 +19,7 @@ class Aspect(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='aspects')
 
 class UserScore(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='user_scores')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_scores')
     resource = models.ForeignKey('Resource', on_delete=models.CASCADE, related_name='user_scores')
     aspect = models.ForeignKey('Aspect', on_delete=models.CASCADE, related_name='user_scores')
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
