@@ -19,10 +19,12 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
 
   const checkPermissions = async (): Promise<void> => {
     if (isLoading) {
+      logger.debug('[GuestGuard]: isLoading');
       return;
     }
 
     if (error) {
+      logger.error('[GuestGuard]: Error occured');
       setIsChecking(false);
       return;
     }
@@ -44,6 +46,8 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
   }, [user, error, isLoading]);
 
   if (isChecking) {
+    logger.debug('[GuestGuard]: isChecking');
+
     return null;
   }
 

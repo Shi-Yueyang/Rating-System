@@ -1,6 +1,7 @@
 'use client';
 
 import type { User } from '@/types/user';
+import axios from 'axios';
 
 function generateToken(): string {
   const arr = new Uint8Array(12);
@@ -28,7 +29,7 @@ export interface SignInWithOAuthParams {
 }
 
 export interface SignInWithPasswordParams {
-  email: string;
+  emailOrUsername: string;
   password: string;
 }
 
@@ -43,7 +44,6 @@ class AuthClient {
     // We do not handle the API, so we'll just generate a token and store it in localStorage.
     const token = generateToken();
     localStorage.setItem('custom-auth-token', token);
-
     return {};
   }
 
@@ -52,19 +52,21 @@ class AuthClient {
   }
 
   async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
-    const { email, password } = params;
+    const { emailOrUsername, password } = params;
 
-    // Make API request
-
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/token/', {
+        username:emailOrUsername,
+        password: password
+      })
+  
+      const token = response.data.access;
+      localStorage.setItem('custom-auth-token',token);
+      console.log('[signInWithPassword] token: '+token);
+      return {};
+    } catch (error){
+      return {error:'invalid credentials'}
     }
-
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
-
-    return {};
   }
 
   async resetPassword(_: ResetPasswordParams): Promise<{ error?: string }> {
@@ -76,16 +78,31 @@ class AuthClient {
   }
 
   async getUser(): Promise<{ data?: User | null; error?: string }> {
-    // Make API request
-
-    // We do not handle the API, so just check if we have a token in localStorage.
     const token = localStorage.getItem('custom-auth-token');
-
+    console.log("[getUser] token:"+token)
+    
     if (!token) {
-      return { data: null };
+      return {}
     }
 
-    return { data: user };
+    console.log("[getUser] found token")
+
+    return axios
+    .get('http://127.0.0.1:8000/rate/users/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => {
+      console.log('[getUser] me endpoint response: ', JSON.stringify(response.data, null, 2));
+      const user = response.data as User;
+      console.log('[getUser] returned User object:', user);
+      return { data: user, error: undefined };
+    })
+    .catch((error) => {
+      // Handle the error and return an appropriate message
+      return { data: null, error: error.response?.data?.message || 'An error occurred' };
+    });
   }
 
   async signOut(): Promise<{ error?: string }> {
