@@ -175,21 +175,29 @@ async getUser(): Promise<{ data?: User | null; error?: string }> {
 - UserConsumer: Old way of consume the context
 - useUser: A custom hook for easier consumption of the context
 
-### Edit UserPopover
+### Edit UserPopover (and the avatar on MainNav)
+- hierarchy: layout.tsx(of dashboard) -- main-nav.ts. -- UserPopover, Avatar
 ```ts
+// user-popover.tsx
 // extract user information from the context
 const {user, checkSession } = useUser();
-
+//
 // Render the component based on context value
 <Typography variant="subtitle1">{user?.username}</Typography>
 <Typography color="text.secondary" variant="body2">
   {user?.email}
 </Typography>
+
+
+// main-nav.tsx
+const {user, checkSession } = useUser();
+// ...
+
 ```
 
 ### Customize user model
 - Start a new "core" app, add it to INSTALLED_APPS
-- Extend the AbstractUser in the core app
+- Extend the AbstractUser in the core app (add an image field)
 - Overwrite the save method to hash the password
 - Update AUTH_USER_MODEL to the new user model
 - Edit the admin.py of core app
