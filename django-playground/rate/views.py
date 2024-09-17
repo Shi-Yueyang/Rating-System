@@ -3,6 +3,8 @@ from .models import Event, Resource, Aspect, User, UserScore
 from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 
 class EventViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
@@ -57,7 +59,13 @@ class AspectViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        user = request.user
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+    
 class UserScoreViewSet(viewsets.ModelViewSet):
     queryset = UserScore.objects.all()
     serializer_class = UserScoreSerializer
