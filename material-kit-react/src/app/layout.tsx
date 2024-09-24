@@ -25,7 +25,9 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
         <LocalizationProvider>
           <UserProvider>
             <ThemeProvider>
-              <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+              <QueryClientProvider client={queryClient}>
+                {children}
+              </QueryClientProvider>
             </ThemeProvider>
           </UserProvider>
         </LocalizationProvider>
