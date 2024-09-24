@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -12,7 +14,7 @@ import { useUser } from '@/hooks/use-user';
 
 
 export function AccountInfo(): React.JSX.Element {
-  const {user, checkSession } = useUser();
+  const {user } = useUser();
   return (
     <Card>
       <CardContent>
