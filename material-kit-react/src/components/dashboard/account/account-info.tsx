@@ -16,7 +16,7 @@ import { useUser } from '@/hooks/use-user';
 export function AccountInfo(): React.JSX.Element {
   const {user } = useUser();
   return (
-    <Card>
+    <Card >
       <CardContent>
         <Stack spacing={2} sx={{ alignItems: 'center' }}>
           <div>
@@ -29,10 +29,19 @@ export function AccountInfo(): React.JSX.Element {
         </Stack>
       </CardContent>
       <Divider />
-      <CardActions>
-        <Button fullWidth variant="text">
-          Upload picture
-        </Button>
+      <CardActions sx={{justifyContent: 'center',}}>
+        <input
+          accept="image/*"
+          style={{ display: 'none' }}
+          id="upload-button-file"
+          type="file"
+        />
+        <label htmlFor="upload-button-file">
+          <Button component="span" variant="text" fullWidth>
+            上传图片
+          </Button>
+        </label>
+
       </CardActions>
     </Card>
   );

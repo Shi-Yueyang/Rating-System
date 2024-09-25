@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Event, Resource, Aspect, User, UserScore
 from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,13 +11,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email','password','avatar']
     
     def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
         user = User(
             username=validated_data['username'],
             email=validated_data['email'],
-            avatar=validated_data.get('avatar', None)  # Avatar is optional
+            password=validated_data['password'],
+            avatar=validated_data.get('avatar', None),
         )
 
-        user.set_password(validated_data['password'])
         user.save()
         return user
 
