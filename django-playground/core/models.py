@@ -6,6 +6,8 @@ class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/',null=True,blank=True)
 
     def save(self,*args,**kwargs):
-        if not self.pk or not self.password.startswith("pbkdf2_"):
+        if not self.password.startswith("pbkdf2_"):
+            print('aaa')
             self.set_password(self.password)
+
         super().save(*args,**kwargs)

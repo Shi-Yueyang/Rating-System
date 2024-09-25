@@ -175,8 +175,8 @@ async getUser(): Promise<{ data?: User | null; error?: string }> {
 - UserConsumer: Old way of consume the context
 - useUser: A custom hook for easier consumption of the context
 
-### Edit UserPopover (and the avatar on MainNav)
-- hierarchy: layout.tsx(of dashboard) -- main-nav.ts. -- UserPopover, Avatar
+### Edit user-popover.tsx (and the avatar on MainNav)
+- hierarchy: layout.tsx(of dashboard) -- main-nav.tsx -- UserPopover, Avatar
 ```ts
 // user-popover.tsx
 // extract user information from the context
@@ -208,11 +208,23 @@ from django.contrib.auth.models import User
 from core.models import CustomUser as User
 ```
 - Install Pillow
-- 
+- Make migrations and migrate
+- update MEDIA_URL and MEDIA_ROOT in settings
+- add DEBUG = True in settings
+- Add the urls of static contents
+
+## account-info.tsx
+- hierarchy: page.tsx (src/app/dashboard/account/page.tsx) -- account-info.tsx
+
+
+
 ## Q&A
 - how to get user inside the dashboard: By `const {user, checkSession } = useUser();`
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- Retrive the task of current user
-- Customize django user model
+- Upload avatar in account page
+- √ Account page: Edit account-info.tsx, the hierachy: Add 'use client'; wherever using context hook
+- √ Set password through browsable api bug: the validated_data['password'] is already hashed. No need to hash again in the serializer. Probably need to hash in the model, incase save directly from admin.
+- √ PATCH method of user model: PATCH is only visible in DETAIL and RAW view in browsable api
+- √ Password field is empty in browsable API: because it is a write only field

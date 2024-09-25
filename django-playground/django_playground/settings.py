@@ -32,6 +32,8 @@ AUTH_USER_MODEL ="core.CustomUser"
 # Application definition
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+DEBUG = True
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -66,6 +68,10 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated',
     # ],
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  # Ensure this is included
+    ),
 }
 
 
