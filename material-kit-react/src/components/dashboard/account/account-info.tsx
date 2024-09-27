@@ -11,15 +11,20 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { useUser } from '@/hooks/use-user';
-import useUploadAvatar from '@/hooks/UseUploadAvatar';
+import useUploadUser from '@/hooks/UseUploadAvatar';
 import { useState } from 'react';
 
-export function AccountInfo(): React.JSX.Element {
+interface Props{
+  previewUrl:string|null;
+  handleFileChange:(event:React.ChangeEvent<HTMLInputElement>)=>void;
+}
+
+export function AccountInfo({previewUrl,handleFileChange}:Props): React.JSX.Element {
   const { user } = useUser();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(user?.avatar || null);
+
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const useAvatar = useUploadAvatar();
+  const useAvatar = useUploadUser();
   return (
     <Card>
       <CardContent>
@@ -40,13 +45,7 @@ export function AccountInfo(): React.JSX.Element {
           id="upload-button-file"
           hidden
           accept="image/*"
-          onChange={(event)=>{
-            if(event.target.files && event.target.files[0]){
-              const file = event.target.files[0];
-              const preview = URL.createObjectURL(file);
-              setPreviewUrl(preview);
-            }
-          }}
+          onChange={handleFileChange}
         />
         <label htmlFor="upload-button-file">
           <Button
