@@ -24,7 +24,6 @@ export function AccountInfo({previewUrl,handleFileChange}:Props): React.JSX.Elem
 
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const useAvatar = useUploadUser();
   return (
     <Card>
       <CardContent>
