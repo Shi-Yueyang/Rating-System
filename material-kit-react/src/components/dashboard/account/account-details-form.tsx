@@ -14,7 +14,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Grid from '@mui/material/Unstable_Grid2';
 
 import { useUser } from '@/hooks/use-user';
-import useUploadUser from '@/hooks/UseUploadAvatar';
+import useUploadUser from '@/hooks/UseUpload';
 import { Alert, Snackbar } from '@mui/material';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
@@ -30,7 +30,7 @@ const userSchema = z.object({
 
 export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
   const { user } = useUser();
-  const uploadUser = useUploadUser();
+  const uploadUser = useUploadUser({});
   
   const {
     control,
