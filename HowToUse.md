@@ -223,7 +223,9 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- UserUpload hook
+- √ Automatically update avatar on main nav after upload: do a "checksession" in the onSuccess callback in upload mutation
+- √ Custom user model: delete old avatar when uploading new one
+- √ UserUpload hook
 - √ account-detail-form: build with zod and useform
 - √ Upload avatar in account page: some component must be server-side, use wraper component to wrap two client component to share state.
 - √ lift the preview in account-info to a upper level

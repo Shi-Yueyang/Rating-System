@@ -2,12 +2,14 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 
 import { User } from '@/types/user';
+import { useUser } from './use-user';
 
 interface Props {
   accessToken?: string;
 }
 
 const useUploadUser = ({ accessToken }: Props) => {
+  const {checkSession} = useUser();
   return useMutation({
     mutationFn: ({ user, avatarFile }: { user: User | null; avatarFile: File | null }) => {
       const formData = new FormData();
@@ -33,9 +35,11 @@ const useUploadUser = ({ accessToken }: Props) => {
       }
     },
     onError: (error) => {
+      if(checkSession) checkSession();
       console.log(`Upload user failed, ${error}`);
     },
     onSuccess: (data) => {
+      if(checkSession) checkSession();
       console.log('User uploaded successfully', data);
     },
   });
