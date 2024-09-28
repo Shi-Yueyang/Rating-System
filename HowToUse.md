@@ -223,8 +223,10 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- Upload avatar in account page: some component must be server-side, use wraper component to wrap two client component to share state.
-- lift the preview in account-info to a upper level
+- UserUpload hook
+- √ account-detail-form: build with zod and useform
+- √ Upload avatar in account page: some component must be server-side, use wraper component to wrap two client component to share state.
+- √ lift the preview in account-info to a upper level
 - √ Preview the uploaded avatar
 - √ Account page: Edit account-info.tsx, the hierachy: Add 'use client'; wherever using context hook
 - √ Set password through browsable api bug: the validated_data['password'] is already hashed. No need to hash again in the serializer. Probably need to hash in the model, incase save directly from admin.
