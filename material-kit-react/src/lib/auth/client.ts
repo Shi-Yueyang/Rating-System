@@ -25,8 +25,16 @@ export interface ResetPasswordParams {
   email: string;
 }
 
+interface SignUpFieldErrors {
+  username?: string;
+  email?: string;
+  password?: string;
+  avatar?: string;
+  [key: string]: string | undefined; // Allow additional error fields
+}
+
 class AuthClient {
-  async signUp(params: SignUpParams): Promise<{ error?: string,fieldErrors?: any }> {
+  async signUp(params: SignUpParams): Promise<{ error?: string,fieldErrors?: SignUpFieldErrors }> {
     // Make API request
     console.log('SignUpParams '+params);
     try{
@@ -47,9 +55,31 @@ class AuthClient {
       return {}
     }catch (error:any){
       if (error.response && error.response.data) {
+        const fieldErrors: SignUpFieldErrors = {};
+        const { data } = error.response;
+        if (data.username) {
+          fieldErrors.username = data.username; // Set username error if it exists
+        }
+        if (data.email) {
+          fieldErrors.email = data.email; // Set email error if it exists
+        }
+        if (data.password) {
+          fieldErrors.password = data.password; // Set password error if it exists
+        }
+        if (data.avatar) {
+          fieldErrors.avatar = data.avatar; // Set avatar error if it exists
+        }
+  
+        // Handle additional error fields dynamically (if any exist in the backend response)
+        Object.keys(data).forEach((key) => {
+          if (!(key in fieldErrors)) {
+            fieldErrors[key] = data[key];
+          }
+        });
+  
         return {
-          error: 'Sign-up failed', 
-          fieldErrors: error.response.data, 
+          error: 'Sign-up failed', // General error message
+          fieldErrors, // Return the structured field errors
         };
       }
 

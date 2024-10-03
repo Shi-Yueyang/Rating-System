@@ -19,10 +19,13 @@ export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | nul
 
   const checkPermissions = async (): Promise<void> => {
     if (isLoading) {
+      logger.debug('[AuthGuard]: isLoading');
       return;
     }
 
     if (error) {
+      logger.debug('[AuthGuard]: error');
+      router.replace(paths.auth.signIn);
       setIsChecking(false);
       return;
     }
