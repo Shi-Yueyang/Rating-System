@@ -20,7 +20,7 @@ const AccountPage = () => {
   };
   return (
     <>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} padding={3}>
         <Grid lg={4} md={6} xs={12}>
           <AccountInfo previewUrl={previewUrl} handleFileChange={handleFileChange} />
         </Grid>

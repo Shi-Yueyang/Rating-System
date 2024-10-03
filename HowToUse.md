@@ -223,6 +223,9 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
+- v guestguard error: don't need to use an error message to block the page
+- Sign up page: what to do after submit page, UX design
+- v remove adds from mobile nav
 - √ Automatically update avatar on main nav after upload: do a "checksession" in the onSuccess callback in upload mutation
 - √ Custom user model: delete old avatar when uploading new one
 - √ UserUpload hook
