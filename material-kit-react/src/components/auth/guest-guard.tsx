@@ -26,6 +26,7 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
     if (error) {
       logger.error('[GuestGuard]: Error occured');
       setIsChecking(false);
+      // router.replace(paths.auth.signIn);
       return;
     }
 
@@ -47,13 +48,10 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
 
   if (isChecking) {
     logger.debug('[GuestGuard]: isChecking');
-
     return null;
   }
 
-  if (error) {
-    return <Alert color="error">{error}</Alert>;
-  }
+
 
   return <React.Fragment>{children}</React.Fragment>;
 }

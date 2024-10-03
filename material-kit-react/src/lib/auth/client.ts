@@ -3,25 +3,13 @@
 import type { User } from '@/types/user';
 import axios from 'axios';
 
-function generateToken(): string {
-  const arr = new Uint8Array(12);
-  window.crypto.getRandomValues(arr);
-  return Array.from(arr, (v) => v.toString(16).padStart(2, '0')).join('');
-}
 
-const user = {
-  id: 'USR-000',
-  avatar: '/assets/avatar.png',
-  firstName: 'Sofia',
-  lastName: 'Rivers',
-  email: 'sofia@devias.io',
-} satisfies User;
 
 export interface SignUpParams {
-  firstName: string;
-  lastName: string;
+  username: string;
   email: string;
   password: string;
+  avatar: File | null;
 }
 
 export interface SignInWithOAuthParams {
@@ -38,13 +26,35 @@ export interface ResetPasswordParams {
 }
 
 class AuthClient {
-  async signUp(_: SignUpParams): Promise<{ error?: string }> {
+  async signUp(params: SignUpParams): Promise<{ error?: string,fieldErrors?: any }> {
     // Make API request
+    console.log('SignUpParams '+params);
+    try{
+      const formData = new FormData();
+      formData.append('username', params.username);
+      formData.append('email', params.email);
+      formData.append('password', params.password);
+      if(params.avatar){
+        formData.append('avatar', params.avatar);
+      }
 
-    // We do not handle the API, so we'll just generate a token and store it in localStorage.
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
-    return {};
+      const response = await axios.post('http://127.0.0.1:8000/rate/users/',formData,{
+        headers: {
+          "Content-Type": "multipart/form-data", // Important for file uploads
+        },
+      });
+
+      return {}
+    }catch (error:any){
+      if (error.response && error.response.data) {
+        return {
+          error: 'Sign-up failed', 
+          fieldErrors: error.response.data, 
+        };
+      }
+
+      return { error: 'An unexpected error occurred' }; // Generic fallback
+    }
   }
 
   async signInWithOAuth(_: SignInWithOAuthParams): Promise<{ error?: string }> {

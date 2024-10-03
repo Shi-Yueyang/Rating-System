@@ -18,7 +18,7 @@ export default function Page(): React.JSX.Element {
     
     <Stack spacing={3}>
       <div>
-        <Typography variant="h4">账号信息</Typography>
+        <Typography variant="h4" padding={3}>账号信息</Typography>
       </div>
       <AccountPage/>
     </Stack>

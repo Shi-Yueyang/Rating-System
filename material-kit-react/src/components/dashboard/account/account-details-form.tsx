@@ -98,7 +98,7 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
           <Button type="submit" variant="contained" disabled={uploadUser.isPending}>
-           Submit
+           提交
           </Button>
         </CardActions>
       </Card>
