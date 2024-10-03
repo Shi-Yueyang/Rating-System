@@ -25,20 +25,30 @@ import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
 
 const schema = zod.object({
-  username: zod.string().min(1, { message: 'First name is required' }),
-  email: zod.string().min(1, { message: 'Email is required' }).email(),
-  password: zod.string().min(6, { message: 'Password should be at least 6 characters' }),
-  terms: zod.boolean().refine((value) => value, 'You must accept the terms and conditions'),
+  username: zod.string().min(1, { message: '您需要提供用户名' }).max(30, { message: '用户名最多30个字符' }) // Limit to 30 characters
+  .regex(/^[a-zA-Z0-9_]+$/, { message: '用户名只能包含字母、数字和下划线' }),
+  email: zod.string().min(1, { message: '您需要提供邮箱' }).email(),
+  password: zod.string().min(6, { message: '密码最少6个字符' }),
+  rePassword: zod.string(),
+  terms: zod.boolean().refine((value) => value, '您必须同意用户条款'),
+}).superRefine(({rePassword,password},ctx)=>{
+  if (rePassword !== password) {
+    ctx.addIssue({
+      code: "custom",
+      message: "确认密码错误",
+      path: ['rePassword']
+    });
+  }
 });
 
 interface FormInputs {
   username: string;
   email: string;
   password: string;
+  rePassword:string;
   terms: boolean;
   avatar: File | null; // Avatar will be manually handled
 }
-
 
 export function SignUpForm(): React.JSX.Element {
   const router = useRouter();
@@ -59,19 +69,27 @@ export function SignUpForm(): React.JSX.Element {
     async (values: FormInputs): Promise<void> => {
       setIsPending(true);
 
-      const { error,fieldErrors } = await authClient.signUp(values);
+      const { error, fieldErrors } = await authClient.signUp(values);
 
       if (error) {
         setError('root', { type: 'server', message: error });
         setIsPending(false);
-        console.log("error signupform"+fieldErrors.username)
-      }
-      if (fieldErrors.username) {
-        console.log("fieldError "+fieldErrors.username)
-        setError('username',{type:'server',message:fieldErrors['username'][0]})
+        if (fieldErrors?.username) {
+          setError('username', { type: 'server', message: fieldErrors['username'][0] });
+        }
+        return;
       }
 
-      if(error) return;
+      const { error: signInError } = await authClient.signInWithPassword({
+        emailOrUsername: values.username,
+        password: values.password,
+      });
+
+      if (signInError) {
+        setError('root', { type: 'server', message: signInError });
+        setIsPending(false);
+        return;
+      }
       // Refresh the auth state
       await checkSession?.();
 
@@ -94,9 +112,8 @@ export function SignUpForm(): React.JSX.Element {
         </Typography>
       </Stack>
       <form onSubmit={handleSubmit(onSubmit)}>
-
         <Stack direction="row" spacing={2} alignItems="center" padding={3}>
-          <Avatar src={previewUrl || ''} sx={{ height: '60px', width: '60px' }}  />
+          <Avatar src={previewUrl || ''} sx={{ height: '60px', width: '60px' }} />
           <input type="file" id="upload-button-file" accept="image/*" hidden />
           <label htmlFor="upload-button-file">
             <Button component="span" variant="outlined" color="primary" fullWidth>
@@ -104,7 +121,7 @@ export function SignUpForm(): React.JSX.Element {
             </Button>
           </label>
         </Stack>
-        
+
         <Stack spacing={2}>
           <Controller
             control={control}
@@ -140,7 +157,17 @@ export function SignUpForm(): React.JSX.Element {
               </FormControl>
             )}
           />
-
+          <Controller
+            control={control}
+            name="rePassword"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.rePassword)}>
+                <InputLabel>确认密码</InputLabel>
+                <OutlinedInput {...field} label="Re-enter Password" type="password" />
+                {errors.rePassword ? <FormHelperText>{errors.rePassword.message}</FormHelperText> : null}
+              </FormControl>
+            )}
+          />
           <Controller
             control={control}
             name="terms"
