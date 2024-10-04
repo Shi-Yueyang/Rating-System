@@ -16,22 +16,21 @@ const AssignmentPage = () => {
     };
     return (
       <Stack spacing={3}>
-        <Button
-          variant="contained"
-          onClick={handleCreateAssignment}
-        >
-          创建新活动
-        </Button>
-  
+        {/* old activities */}
         <Grid container spacing={3}>
-  
           {activities?.map((activity) => (
             <Grid key={activity.id} lg={4} md={6} xs={12}>
               <ActivityCard activity={activity}></ActivityCard>
             </Grid>
           ))}
-  
         </Grid>
+        {/* new activity */}
+        <Button
+          variant="outlined"
+          onClick={handleCreateAssignment}
+        >
+          新建活动
+        </Button>
       </Stack>
     );
 }

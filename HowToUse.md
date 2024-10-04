@@ -223,14 +223,15 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- Add new assignment
-- v signup avatar: add manually using spread opeartor in onsubmit
-- v Authguard, checksession, getuser error, auto log out
-- v re-enter password, sanitize username input
-- v Sign up page: success auto log in
-- v Sign up page: print out error meessage with seterror form form hook
-- v guestguard error: don't need to use an error message to block the page
-- v remove adds from mobile nav
+- √ Aspects Table add name field
+- √ Add new assignment: create route structure
+- √ signup avatar: add manually using spread opeartor in onsubmit
+- √ Authguard, checksession, getuser error, auto log out
+- √ re-enter password, sanitize username input
+- √ Sign up page: success auto log in
+- √ Sign up page: print out error meessage with seterror form form hook
+- √ guestguard error: don't need to use an error message to block the page
+- √ remove adds from mobile nav
 - √ Automatically update avatar on main nav after upload: do a "checksession" in the onSuccess callback in upload mutation
 - √ Custom user model: delete old avatar when uploading new one
 - √ UserUpload hook
