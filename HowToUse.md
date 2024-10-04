@@ -223,6 +223,7 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
+- Add new assignment
 - v signup avatar: add manually using spread opeartor in onsubmit
 - v Authguard, checksession, getuser error, auto log out
 - v re-enter password, sanitize username input
