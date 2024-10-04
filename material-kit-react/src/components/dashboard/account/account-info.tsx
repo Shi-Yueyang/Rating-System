@@ -11,8 +11,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { useUser } from '@/hooks/use-user';
-import useUploadUser from '@/hooks/UseUpload';
-import { useState } from 'react';
+
 
 interface Props{
   previewUrl:string|null;

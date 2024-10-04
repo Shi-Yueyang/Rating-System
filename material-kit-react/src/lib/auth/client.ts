@@ -43,6 +43,7 @@ class AuthClient {
       formData.append('email', params.email);
       formData.append('password', params.password);
       if(params.avatar){
+        console.log("[AuthClient:SignUp] has avatar")
         formData.append('avatar', params.avatar);
       }
 
