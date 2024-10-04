@@ -30,7 +30,7 @@ class ResourceSerializer(serializers.ModelSerializer):
 class AspectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aspect
-        fields = ['id', 'description', 'percentage', 'event']
+        fields = ['id','name', 'description', 'percentage', 'event']
 
 class EventSerializer(serializers.ModelSerializer):
     aspects = AspectSerializer(many=True,read_only=True)

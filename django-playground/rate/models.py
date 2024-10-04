@@ -14,6 +14,7 @@ class Resource(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='resources')
 
 class Aspect(models.Model):
+    name = models.CharField(max_length=100,default="Default name")
     description = models.TextField()
     percentage = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0),MaxValueValidator(100)])         
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='aspects')
