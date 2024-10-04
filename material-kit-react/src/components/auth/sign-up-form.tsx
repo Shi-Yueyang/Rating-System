@@ -24,28 +24,33 @@ import { paths } from '@/paths';
 import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
 
-const schema = zod.object({
-  username: zod.string().min(1, { message: '您需要提供用户名' }).max(30, { message: '用户名最多30个字符' }) // Limit to 30 characters
-  .regex(/^[a-zA-Z0-9_]+$/, { message: '用户名只能包含字母、数字和下划线' }),
-  email: zod.string().min(1, { message: '您需要提供邮箱' }).email(),
-  password: zod.string().min(6, { message: '密码最少6个字符' }),
-  rePassword: zod.string(),
-  terms: zod.boolean().refine((value) => value, '您必须同意用户条款'),
-}).superRefine(({rePassword,password},ctx)=>{
-  if (rePassword !== password) {
-    ctx.addIssue({
-      code: "custom",
-      message: "确认密码错误",
-      path: ['rePassword']
-    });
-  }
-});
+const schema = zod
+  .object({
+    username: zod
+      .string()
+      .min(1, { message: '您需要提供用户名' })
+      .max(30, { message: '用户名最多30个字符' }) // Limit to 30 characters
+      .regex(/^[a-zA-Z0-9_]+$/, { message: '用户名只能包含字母、数字和下划线' }),
+    email: zod.string().min(1, { message: '您需要提供邮箱' }).email(),
+    password: zod.string().min(6, { message: '密码最少6个字符' }),
+    rePassword: zod.string(),
+    terms: zod.boolean().refine((value) => value, '您必须同意用户条款'),
+  })
+  .superRefine(({ rePassword, password }, ctx) => {
+    if (rePassword !== password) {
+      ctx.addIssue({
+        code: 'custom',
+        message: '确认密码错误',
+        path: ['rePassword'],
+      });
+    }
+  });
 
 interface FormInputs {
   username: string;
   email: string;
   password: string;
-  rePassword:string;
+  rePassword: string;
   terms: boolean;
   avatar: File | null; // Avatar will be manually handled
 }
@@ -57,6 +62,7 @@ export function SignUpForm(): React.JSX.Element {
 
   const [isPending, setIsPending] = useState<boolean>(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const {
     control,
@@ -69,7 +75,10 @@ export function SignUpForm(): React.JSX.Element {
     async (values: FormInputs): Promise<void> => {
       setIsPending(true);
 
-      const { error, fieldErrors } = await authClient.signUp(values);
+      // Include avatar file in the submission values
+      const signUpValues = { ...values, avatar: avatarFile };
+
+      const { error, fieldErrors } = await authClient.signUp(signUpValues);
 
       if (error) {
         setError('root', { type: 'server', message: error });
@@ -100,6 +109,16 @@ export function SignUpForm(): React.JSX.Element {
     [checkSession, router, setError]
   );
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      console.log("[handleFileChange] has avator")
+      const file = event.target.files[0];
+      setAvatarFile(event.target.files[0]);
+      const preview = URL.createObjectURL(file);
+      setPreviewUrl(preview);
+    }
+  };
+
   return (
     <Stack spacing={3}>
       <Stack spacing={1}>
@@ -114,7 +133,7 @@ export function SignUpForm(): React.JSX.Element {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack direction="row" spacing={2} alignItems="center" padding={3}>
           <Avatar src={previewUrl || ''} sx={{ height: '60px', width: '60px' }} />
-          <input type="file" id="upload-button-file" accept="image/*" hidden />
+          <input type="file" id="upload-button-file" accept="image/*" hidden onChange={handleFileChange} />
           <label htmlFor="upload-button-file">
             <Button component="span" variant="outlined" color="primary" fullWidth>
               上传头像
