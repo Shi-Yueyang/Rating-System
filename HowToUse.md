@@ -223,7 +223,8 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- Error message from UseActivity mutation
+- √ Dateformat to YYYY-MM-DD
+- √ Error message from UseActivity mutation, use onError from useMutation and mutate. 
 - √ Datepicker with react form hook: in onchange, need to convert date object to string
 - √ post new activity: can't create mutation inside onsubmit, but rather in the outer function
 - √ create event submit button doesn't work: datepicker can't integrate with react form hook
