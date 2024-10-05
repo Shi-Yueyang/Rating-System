@@ -11,6 +11,8 @@ import { Activity, useUpdateActivities } from '@/hooks/UseActivity';
 import InputFileUpload from '@/components/dashboard/assignments/InputFileUpload';
 import { useState } from 'react';
 import { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
+import { paths } from '@/paths';
 
 // Zod validation schema
 const schema = z.object({
@@ -61,7 +63,8 @@ const CreateAssignment = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
   const activityMutation = useUpdateActivities({ accessToken });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+  const router = useRouter(); 
+
   // Form submission handler
   const onSubmit = (data: FormData) => {
     const newActivity: Activity = { name: data.eventName, dueDate: data.duedate };
@@ -75,7 +78,10 @@ const CreateAssignment = () => {
 
         const fieldErrors = error.response.data as Record<string,string[]>;
         setErrorMessage(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
-
+      },
+      onSuccess:(data)=>{
+        setErrorMessage(null);
+        router.push(paths.dashboard.activity);
       }
     });
   };
@@ -107,7 +113,7 @@ const CreateAssignment = () => {
                     value={field.value ? dayjs(field.value) : null} // Ensure value is a valid date
                     onChange={(date) => {
                       try{
-                        field.onChange(date?.toISOString()); // Store the date as ISO string or a format that backend expects
+                        field.onChange(dayjs(date).format('YYYY-MM-DD')); 
                       }
                       catch(error){
                         console.log("[CreateAssignment] date error"+error)
