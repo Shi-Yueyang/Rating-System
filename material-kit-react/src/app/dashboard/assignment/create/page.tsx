@@ -3,15 +3,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Divider, Grid, Stack, TextField, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Activity, useUpdateActivities } from '@/hooks/UseActivity';
 import InputFileUpload from '@/components/dashboard/assignments/InputFileUpload';
+import { useState } from 'react';
+import { AxiosError } from 'axios';
 
 // Zod validation schema
 const schema = z.object({
   eventName: z.string().min(1, { message: '请输入任务名称' }),
-  dueDate: z.date({ required_error: '请选择日期' }),
+  duedate: z.string(),
   criteria: z
     .array(
       z.object({
@@ -43,6 +47,7 @@ const CreateAssignment = () => {
     formState: { errors },
     register,
     setValue,
+    setError
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -53,10 +58,26 @@ const CreateAssignment = () => {
     name: 'criteria',
   });
 
+  const accessToken = localStorage.getItem('custom-auth-token');
+  const activityMutation = useUpdateActivities({ accessToken });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
   // Form submission handler
   const onSubmit = (data: FormData) => {
-    console.log('Form Data:', data);
-    // Add logic to send the form data to the backend
+    const newActivity: Activity = { name: data.eventName, dueDate: data.duedate };
+    activityMutation.mutate(newActivity,{
+      onError:(error:AxiosError)=>{
+        console.log('[CreateAssignment onSubmit onError]',error);
+
+        if(!error.response || !error.response.data){
+          return;
+        }
+
+        const fieldErrors = error.response.data as Record<string,string[]>;
+        setErrorMessage(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
+
+      }
+    });
   };
 
   return (
@@ -74,20 +95,36 @@ const CreateAssignment = () => {
 
           {/* Date field */}
           <Controller
-            name="dueDate"
             control={control}
-            render={({ field }) => <DatePicker label="截止日期" onChange={(date) => field.onChange(date)} />}
+            name="duedate"
+            rules={{ required: true }}
+            render={({ field, fieldState }) => {
+              return (
+                <>
+                  <DatePicker
+                    {...field}
+                    label="截至日期"
+                    value={field.value ? dayjs(field.value) : null} // Ensure value is a valid date
+                    onChange={(date) => {
+                      try{
+                        field.onChange(date?.toISOString()); // Store the date as ISO string or a format that backend expects
+                      }
+                      catch(error){
+                        console.log("[CreateAssignment] date error"+error)
+                      }
+                    }}
+                  />
+                  {/* <TextField label="date error" error={!!errors.date} helperText={errors.date?.message} /> */}
+                </>
+              );
+            }}
           />
-
           {/* Criteria List */}
           <Stack spacing={2}>
             <Typography variant="h6">评价标准</Typography>
             {fields.map((field, index) => (
               <Box key={field.id} sx={{ border: '1px solid #ddd', padding: 2 }}>
-                <Grid
-                  container
-                  spacing={2}
-                >
+                <Grid container spacing={2}>
                   <Grid item xs={3}>
                     <TextField
                       label="名称"
@@ -141,8 +178,8 @@ const CreateAssignment = () => {
           </Button>
         </Stack>
       </form>
-
-      {errors.criteria && <Typography color="error">{errors.criteria.message || '标准部分有错误'}</Typography>}
+      {activityMutation.isError && <Typography color="error">error: {activityMutation.error?.message}</Typography>}
+      {errorMessage && <Typography color="error">{errorMessage}</Typography>}
     </Stack>
   );
 };
