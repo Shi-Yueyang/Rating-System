@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
 import { paths } from '@/paths';
+import {  UseApiResources } from '@/hooks/UseApiResource';
 
 // Zod validation schema
 const schema = z.object({
@@ -41,7 +42,12 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
-
+export interface Aspect{
+  name:string;
+  description:string;
+  percentage:number
+  event:number
+}
 const CreateAssignment = () => {
   const {
     control,
@@ -61,29 +67,46 @@ const CreateAssignment = () => {
   });
 
   const accessToken = localStorage.getItem('custom-auth-token');
-  const activityMutation = useUpdateActivities({ accessToken });
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorCreateActivity, setErrorCreateActivity] = useState<string | null>(null);
+  const [errorCreateAspect,setErrorCreateAspect] =useState<string|null>(null);
+
   const router = useRouter(); 
+  const activityMutation = useUpdateActivities({ accessToken });
+  const{useMutateResources:useMutateAspect} = UseApiResources<Aspect>({
+    endPoint:'http://127.0.0.1:8000/rate/aspects/',
+    queryKey:['aspect'],
+    accessToken:accessToken
+  });
+  const usePostAspect = useMutateAspect('POST');
 
   // Form submission handler
   const onSubmit = (data: FormData) => {
+    
     const newActivity: Activity = { name: data.eventName, dueDate: data.duedate };
     activityMutation.mutate(newActivity,{
       onError:(error:AxiosError)=>{
         console.log('[CreateAssignment onSubmit onError]',error);
-
         if(!error.response || !error.response.data){
           return;
         }
-
         const fieldErrors = error.response.data as Record<string,string[]>;
-        setErrorMessage(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
+        setErrorCreateActivity(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
       },
-      onSuccess:(data)=>{
-        setErrorMessage(null);
-        router.push(paths.dashboard.activity);
-      }
+
     });
+
+    const aspects:Aspect[] = data.criteria.map((criterion)=>({...criterion,event:1}));
+    aspects.forEach((aspect)=>{
+      usePostAspect.mutate(aspect,{
+        onError:(error)=>{
+          if(!error.response || !error.response.data){
+            return;
+          }
+          const fieldErrors = error.response.data as Record<string,string[]>;
+          setErrorCreateAspect(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
+        }
+      });
+    })
   };
 
   return (
@@ -185,7 +208,8 @@ const CreateAssignment = () => {
         </Stack>
       </form>
       {activityMutation.isError && <Typography color="error">error: {activityMutation.error?.message}</Typography>}
-      {errorMessage && <Typography color="error">{errorMessage}</Typography>}
+      {errorCreateActivity && <Typography color="error">{errorCreateActivity}</Typography>}
+      {errorCreateAspect && <Typography color="error">{errorCreateAspect}</Typography>}
     </Stack>
   );
 };

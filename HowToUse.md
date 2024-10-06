@@ -223,6 +223,7 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
+- Event supports transaction for post a event along with aspects
 - √ Dateformat to YYYY-MM-DD
 - √ Error message from UseActivity mutation, use onError from useMutation and mutate. 
 - √ Datepicker with react form hook: in onchange, need to convert date object to string

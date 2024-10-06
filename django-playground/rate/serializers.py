@@ -30,20 +30,25 @@ class ResourceSerializer(serializers.ModelSerializer):
 class AspectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aspect
-        fields = ['id','name', 'description', 'percentage', 'event']
+        fields = ['id','name', 'description', 'percentage']
+
 
 class EventSerializer(serializers.ModelSerializer):
-    aspects = AspectSerializer(many=True,read_only=True)
-    resources = ResourceSerializer(many=True,read_only=True)
+    aspects = AspectSerializer(many=True)
     class Meta:
         model = Event
-        fields = ['id', 'name', 'dueDate','aspects','resources'] 
+        fields = ['id','name','dueDate','aspects']
 
-class EventSimpleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Event
-        fields = ['id','name','dueDate']
+    def create(self, validated_data):
+        aspects_data = validated_data.pop('aspects')  # Extract aspects data
+        event = Event.objects.create(**validated_data)  # Create the event
 
+        # Create the aspects related to the event
+        for aspect_data in aspects_data:
+            Aspect.objects.create(event=event, **aspect_data)
+
+        return event
+        
 class UserScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserScore
