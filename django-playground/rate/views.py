@@ -26,8 +26,8 @@ class EventViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def create(self, request):
         serializer = EventSerializer(data=request.data)
+        print(request.data)
         if serializer.is_valid():
-            print(1)
             event = serializer.save()  # Save the event and aspects
             return Response({'id': event.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

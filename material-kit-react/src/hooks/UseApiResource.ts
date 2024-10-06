@@ -1,27 +1,38 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
-
+export interface Activity {
+    id?: number;
+    name: string;
+    dueDate: string;
+  }
+  
+export interface Aspect{
+    name:string;
+    description:string;
+    percentage:number;
+}  
 
 async function fetchData<T>(endPoint:string):Promise<T[]>{
     const response = await axios.get(endPoint);
     return response.data;
 }
 
-async function mutateData<T>(endPoint:string, data:T|T[],config:AxiosRequestConfig):Promise<T>{
+async function mutateData<T>(endPoint:string, data:T,config:AxiosRequestConfig):Promise<T>{
     const response = await axios.post(endPoint,data,config);
     return response.data;
 }
 
-interface Props<T>{
+interface Props{
     endPoint:string;
     accessToken?:string|null;
     queryKey:string[]
 }
 
-export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props<T>){
+export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
     const headers: Record<string, string> = {
-        'Content-Type': 'multipart/form-data',
+        // 'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       };
       if (accessToken) {
         headers.Authorization = `Bearer ${accessToken}`;
@@ -37,7 +48,7 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props<T>){
 
       const useMutateResources = (method:'POST'|'PATCH'|'PUT') =>{
         return useMutation({
-            mutationFn:(data:T|T[])=>mutateData<T>(endPoint,data,{method,headers}),
+            mutationFn:(data:T)=>mutateData<T>(endPoint,data,{method,headers}),
             onError:(error:AxiosError)=>{
                 console.error("[useApiResource onError]:", error.response?.data);
                 throw error;
