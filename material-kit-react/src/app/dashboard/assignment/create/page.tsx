@@ -1,19 +1,18 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Divider, Grid, Stack, TextField, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
+import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Activity, useUpdateActivities } from '@/hooks/UseActivity';
-import InputFileUpload from '@/components/dashboard/assignments/InputFileUpload';
-import { useState } from 'react';
-import { AxiosError } from 'axios';
-import { useRouter } from 'next/navigation';
 import { paths } from '@/paths';
-import {  UseApiResources } from '@/hooks/UseApiResource';
+import { Activity, Aspect, UseApiResources } from '@/hooks/UseApiResource';
+import InputFileUpload from '@/components/dashboard/assignments/InputFileUpload';
 
 // Zod validation schema
 const schema = z.object({
@@ -27,26 +26,15 @@ const schema = z.object({
         percentage: z.number().min(1, { message: '百分比至少为1' }),
       })
     )
-    .min(1, { message: '至少一个标准' })
-    .superRefine((criteria, ctx) => {
-      const totalPercentage = criteria.reduce((acc, item) => acc + item.percentage, 0);
-      if (totalPercentage !== 100) {
-        ctx.addIssue({
-          code: 'custom',
-          message: `百分比总和必须为100, 当前为${totalPercentage}`,
-          path: ['percentage'],
-        });
-      }
-    }),
+    .min(1, { message: '至少一个标准' }),
   resources: z.array(z.instanceof(File)).optional(),
 });
 
 type FormData = z.infer<typeof schema>;
-export interface Aspect{
+export interface ActivityWithAspect {
   name:string;
-  description:string;
-  percentage:number
-  event:number
+  dueDate:string;
+  aspects:Aspect[];
 }
 const CreateAssignment = () => {
   const {
@@ -55,7 +43,7 @@ const CreateAssignment = () => {
     formState: { errors },
     register,
     setValue,
-    setError
+    setError,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -68,45 +56,41 @@ const CreateAssignment = () => {
 
   const accessToken = localStorage.getItem('custom-auth-token');
   const [errorCreateActivity, setErrorCreateActivity] = useState<string | null>(null);
-  const [errorCreateAspect,setErrorCreateAspect] =useState<string|null>(null);
 
-  const router = useRouter(); 
-  const activityMutation = useUpdateActivities({ accessToken });
-  const{useMutateResources:useMutateAspect} = UseApiResources<Aspect>({
-    endPoint:'http://127.0.0.1:8000/rate/aspects/',
-    queryKey:['aspect'],
-    accessToken:accessToken
+  const router = useRouter();
+
+  const { useMutateResources: useMutateActivityWithAspect } = UseApiResources<ActivityWithAspect>({
+    endPoint: 'http://127.0.0.1:8000/rate/events/',
+    queryKey: ['events'],
+    accessToken: accessToken,
   });
-  const usePostAspect = useMutateAspect('POST');
+  const usePostActivityWithAspect = useMutateActivityWithAspect('POST');
 
   // Form submission handler
   const onSubmit = (data: FormData) => {
-    
-    const newActivity: Activity = { name: data.eventName, dueDate: data.duedate };
-    activityMutation.mutate(newActivity,{
-      onError:(error:AxiosError)=>{
-        console.log('[CreateAssignment onSubmit onError]',error);
-        if(!error.response || !error.response.data){
+    const aspects: Aspect[] = data.criteria.map((criterion) => ({ ...criterion }));
+    const activityWithAspect:ActivityWithAspect = {name: data.eventName, dueDate: data.duedate ,aspects};
+
+
+    usePostActivityWithAspect.mutate(activityWithAspect, {
+      onError: (error: AxiosError) => {
+        console.log('[CreateAssignment onSubmit onError]', error);
+        if (!error.response || !error.response.data) {
           return;
         }
-        const fieldErrors = error.response.data as Record<string,string[]>;
-        setErrorCreateActivity(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
+        const fieldErrors = error.response.data as Record<string, string[]>;
+        setErrorCreateActivity(
+          Object.entries(fieldErrors)
+            .map(([field, messages]) => `${field}:${messages.join(' ')}`)
+            .join(';')
+        );
       },
-
+      onSuccess:()=>{
+        router.push(paths.dashboard.activity);
+      }
     });
 
-    const aspects:Aspect[] = data.criteria.map((criterion)=>({...criterion,event:1}));
-    aspects.forEach((aspect)=>{
-      usePostAspect.mutate(aspect,{
-        onError:(error)=>{
-          if(!error.response || !error.response.data){
-            return;
-          }
-          const fieldErrors = error.response.data as Record<string,string[]>;
-          setErrorCreateAspect(Object.entries(fieldErrors).map(([field,messages])=>`${field}:${messages.join(' ')}`).join(';'));
-        }
-      });
-    })
+
   };
 
   return (
@@ -135,11 +119,10 @@ const CreateAssignment = () => {
                     label="截至日期"
                     value={field.value ? dayjs(field.value) : null} // Ensure value is a valid date
                     onChange={(date) => {
-                      try{
-                        field.onChange(dayjs(date).format('YYYY-MM-DD')); 
-                      }
-                      catch(error){
-                        console.log("[CreateAssignment] date error"+error)
+                      try {
+                        field.onChange(dayjs(date).format('YYYY-MM-DD'));
+                      } catch (error) {
+                        console.log('[CreateAssignment] date error' + error);
                       }
                     }}
                   />
@@ -207,9 +190,8 @@ const CreateAssignment = () => {
           </Button>
         </Stack>
       </form>
-      {activityMutation.isError && <Typography color="error">error: {activityMutation.error?.message}</Typography>}
+      {usePostActivityWithAspect.isError && <Typography color="error">error: {usePostActivityWithAspect.error?.message}</Typography>}
       {errorCreateActivity && <Typography color="error">{errorCreateActivity}</Typography>}
-      {errorCreateAspect && <Typography color="error">{errorCreateAspect}</Typography>}
     </Stack>
   );
 };

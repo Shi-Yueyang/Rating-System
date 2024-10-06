@@ -223,7 +223,8 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- Event supports transaction for post a event along with aspects
+- activity create
+- √ Event viewset supports transaction for post a event along with aspects
 - √ Dateformat to YYYY-MM-DD
 - √ Error message from UseActivity mutation, use onError from useMutation and mutate. 
 - √ Datepicker with react form hook: in onchange, need to convert date object to string
@@ -250,3 +251,6 @@ from core.models import CustomUser as User
 - √ Set password through browsable api bug: the validated_data['password'] is already hashed. No need to hash again in the serializer. Probably need to hash in the model, incase save directly from admin.
 - √ PATCH method of user model: PATCH is only visible in DETAIL and RAW view in browsable api
 - √ Password field is empty in browsable API: because it is a write only field
+
+## Caveat
+- use 'Content-Type': 'application/json' to send json data, and 'Content-Type': 'multipart/form-data' for form data(upload files)
