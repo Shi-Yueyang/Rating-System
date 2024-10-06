@@ -5,9 +5,9 @@ from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
-
+from django.contrib.auth.models import Group
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -67,7 +67,32 @@ class AspectViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        elif self.action in ['update','partial_update']:
+            return [IsAuthenticated()]
+        elif self.action == 'retrieve' and self.kwargs.get('pk') != str(self.request.user.id):
+            return [IsAdminUser()]
+        elif self.action == 'list':
+            # Only allow admin users to list all users
+            return [IsAdminUser()]
+        return [IsAuthenticated()] 
+
+    # Add to Expert group by default
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        user = User.objects.get(id=response.data['id'])
+        group_name = 'Expert'
+        try:
+            group = Group.objects.get(name=group_name)
+            user.groups.add(group)
+        except Group.DoesNotExist:
+            return Response({'error': 'Group does not exist'}, status=400)
+
+        return response
+
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         user = request.user
