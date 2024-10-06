@@ -223,7 +223,8 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- activity create
+- User group
+- √ activity create: upload activity and aspects in one click (use json data instead of form data in header)
 - √ Event viewset supports transaction for post a event along with aspects
 - √ Dateformat to YYYY-MM-DD
 - √ Error message from UseActivity mutation, use onError from useMutation and mutate. 
