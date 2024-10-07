@@ -223,7 +223,7 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- create dynamic route for event detail page
+- √ create dynamic route for event detail page
 - headers not send in axios.get
 - Upload files
 - sign out doesn't work some time
