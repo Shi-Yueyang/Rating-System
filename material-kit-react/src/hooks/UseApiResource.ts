@@ -13,10 +13,21 @@ export interface Aspect{
     percentage:number;
 }  
 
+export interface ActivityWithAspect {
+  name:string;
+  dueDate:string;
+  aspects:Aspect[];
+}
 async function fetchData<T>(endPoint:string,headers:Record<string, string>):Promise<T[]>{
     const response = await axios.get(endPoint,{headers});
     return response.data;
 }
+
+async function fetchSingleData<T>(endPoint:string,headers:Record<string, string>):Promise<T>{
+  const response = await axios.get(endPoint,{headers});
+  return response.data;
+}
+
 
 async function mutateData<T>(endPoint:string, data:T,config:AxiosRequestConfig):Promise<T>{
     const response = await axios.post(endPoint,data,config);
@@ -39,6 +50,14 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
         headers.Authorization = `Bearer ${accessToken}`;
       }
 
+      const useFetchSingleResource = () =>{
+        return useQuery<T,Error>({
+            queryKey,
+            queryFn: ()=>fetchSingleData<T>(endPoint,headers),
+            staleTime: 5*60*1000
+        })
+      }
+
       const useFetchResources = () =>{
         return useQuery<T[],Error>({
             queryKey,
@@ -58,6 +77,7 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
       }
 
       return{
+        useFetchSingleResource,
         useFetchResources,
         useMutateResources
       }

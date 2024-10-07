@@ -11,7 +11,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { paths } from '@/paths';
-import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
+import { ActivityWithAspect, Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
 // Zod validation schema
 const schema = z.object({
@@ -30,11 +30,7 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
-export interface ActivityWithAspect {
-  name:string;
-  dueDate:string;
-  aspects:Aspect[];
-}
+
 const CreateActivity = () => {
   const {
     control,
