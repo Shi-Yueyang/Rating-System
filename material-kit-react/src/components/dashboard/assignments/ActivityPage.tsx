@@ -10,9 +10,8 @@ import { paths } from '@/paths';
 import { Activity, UseApiResources } from '@/hooks/UseApiResource';
 import ActivityCard from '@/components/dashboard/assignments/ActivityCard';
 
-const AssignmentPage = () => {
+const ActivityPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
-
   const { useFetchResources: useActivities } = UseApiResources<Activity>({
     endPoint: 'http://127.0.0.1:8000/rate/events/',
     accessToken,
@@ -41,4 +40,4 @@ const AssignmentPage = () => {
   );
 };
 
-export default AssignmentPage;
+export default ActivityPage;

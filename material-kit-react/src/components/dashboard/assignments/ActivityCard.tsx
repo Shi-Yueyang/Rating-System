@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, Typography } from '@mui/material';
-import dayjs from 'dayjs';
-import { Activity } from '@/hooks/UseActivity';
+import { Activity } from '@/hooks/UseApiResource';
+import { useRouter } from 'next/navigation';
+import { paths } from '@/paths';
 
 
 
@@ -10,8 +11,16 @@ interface Props {
 }
 
 const ActivityCard = ({ activity }: Props) => {
+  const router = useRouter();
+  const handleCardClick = () => {
+    router.push(paths.eventDetails+activity.id);
+  };
+
   return (
-    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Card
+      sx={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }} // Add cursor to indicate it's clickable
+      onClick={handleCardClick} // Make the card clickable
+    >
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
           {activity.name}

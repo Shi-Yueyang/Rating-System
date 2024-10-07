@@ -8,10 +8,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
+from core.permissions import IsAdminOrOrganizer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
-        
+    permission_classes = [IsAdminOrOrganizer]
+    
     def get_queryset(self):
         queryset = Event.objects.all()
         user_id = self.request.query_params.get('user_id')
@@ -58,11 +60,9 @@ class ResourceViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(resource)
         return Response(serializer.data)
 
-
 class AspectViewSet(viewsets.ModelViewSet):
     queryset = Aspect.objects.all()
     serializer_class = AspectSerializer
-
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
