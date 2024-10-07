@@ -10,5 +10,6 @@ export const paths = {
     activity: '/dashboard/assignment', // newly added
   },
   createEvent:'/dashboard/assignment/create',
+  eventDetails:'/dashboard/assignment/details/',
   errors: { notFound: '/errors/not-found' },
 } as const;

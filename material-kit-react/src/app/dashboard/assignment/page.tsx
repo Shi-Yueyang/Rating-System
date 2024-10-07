@@ -1,6 +1,6 @@
+import ActivityPage from '@/components/dashboard/assignments/ActivityPage';
 import { Stack, Typography } from '@mui/material';
 
-import AssignmentPage from '@/components/dashboard/assignments/AssignmentPage';
 
 export default function Page(): React.JSX.Element {
   return (
@@ -10,7 +10,7 @@ export default function Page(): React.JSX.Element {
           活动信息
         </Typography>
       </div>
-      <AssignmentPage></AssignmentPage>
+      <ActivityPage></ActivityPage>
     </Stack>
   );
 }

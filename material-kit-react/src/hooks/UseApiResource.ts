@@ -13,8 +13,8 @@ export interface Aspect{
     percentage:number;
 }  
 
-async function fetchData<T>(endPoint:string):Promise<T[]>{
-    const response = await axios.get(endPoint);
+async function fetchData<T>(endPoint:string,headers:Record<string, string>):Promise<T[]>{
+    const response = await axios.get(endPoint,{headers});
     return response.data;
 }
 
@@ -35,13 +35,14 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
         'Content-Type': 'application/json',
       };
       if (accessToken) {
+        
         headers.Authorization = `Bearer ${accessToken}`;
       }
 
       const useFetchResources = () =>{
         return useQuery<T[],Error>({
             queryKey,
-            queryFn: ()=>fetchData<T>(endPoint),
+            queryFn: ()=>fetchData<T>(endPoint,headers),
             staleTime: 5*60*1000
         })
       }
