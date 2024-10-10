@@ -20,6 +20,7 @@ import {
 import { User } from '@/types/user';
 import { ActivityWithAspect, UseApiResources } from '@/hooks/UseApiResource';
 import MultiSelect from './MultiSelect';
+import { FileUpload, FileUploadProps } from './FileUpload';
 
 interface AssignmentFile {
   file: File | null;
@@ -64,28 +65,71 @@ const ActivityDetails = () => {
       return updated;
     });
   };
+
+  const fileUploadProp: FileUploadProps = {
+    accept: 'file/*',
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (
+            event.target.files !== null &&
+            event.target?.files?.length > 0
+        ) {
+          const files = event.target.files;
+          const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
+          setAssignments((prev) => [...prev, ...newAssignments]);
+        }
+    },
+    onDrop: (event: React.DragEvent<HTMLElement>) => {
+        console.log(`Drop ${event.dataTransfer.files[0].name}`)
+    },
+  }
+  
   return (
-    <Card>
-      <CardContent>
-        <Grid>
-          <Typography variant="h5">上传文件</Typography>
-          <Box mt={2}>
-            <Button variant="contained" component="label">
-              选择文件
-              <input type="file" hidden multiple onChange={handleFileChange}></input>
-            </Button>
-          </Box>
-        </Grid>
-        {assignments.map((assignment, index) => (
-          <Grid item xs={12}>
-            <Typography variant="body1" style={{ marginRight: 16 }}>
-              {assignment.file?.name}
-            </Typography>
-            <MultiSelect></MultiSelect>
+    <>
+      {/* First card: File upload section */}
+      <Card
+        sx={{
+          boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add some shadow for depth
+          marginBottom: 3, // Space below the card
+        }}
+      >
+        <CardContent>
+          <Grid container direction="column" justifyContent="center" alignItems="center" spacing={2}>
+            <Grid item>
+              <Typography variant="h5" color="secondary">上传文件</Typography> {/* Primary color for text */}
+            </Grid>
+            <Grid item>
+              <Box mt={2}>
+                <FileUpload {...fileUploadProp} />
+              </Box>
+            </Grid>
           </Grid>
-        ))}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      {/* Second card: List of uploaded files and multi-select options */}
+      <Card
+        sx={{
+          boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add shadow
+        }}
+      >
+        <CardContent>
+          <Grid container direction="column" spacing={3}>
+            {assignments.map((assignment, index) => (
+              <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
+                <Grid item>
+                  <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
+                    {assignment.file?.name}
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <MultiSelect />
+                </Grid>
+              </Grid>
+            ))}
+          </Grid>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 
