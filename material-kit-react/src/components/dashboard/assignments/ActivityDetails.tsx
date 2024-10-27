@@ -2,25 +2,13 @@
 
 import { ChangeEvent, useState } from 'react';
 import { useParams } from 'next/navigation';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Grid,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
 
 import { User } from '@/types/user';
 import { ActivityWithAspect, UseApiResources } from '@/hooks/UseApiResource';
-import MultiSelect from './MultiSelect';
+
 import { FileUpload, FileUploadProps } from './FileUpload';
+import MultiSelect from './MultiSelect';
 
 interface AssignmentFile {
   file: File | null;
@@ -28,7 +16,7 @@ interface AssignmentFile {
 }
 
 const ActivityDetails = () => {
-  // get activity
+  // hooks
   const { id } = useParams();
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchSingleResource: fetchAcitvity } = UseApiResources<ActivityWithAspect>({
@@ -44,45 +32,40 @@ const ActivityDetails = () => {
   });
   const { data: activity } = fetchAcitvity();
   const { data: users } = fetchUsers();
-  // assignment state
+  // states
   const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) {
-      return;
-    }
-    const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
-    setAssignments((prev) => [...prev, ...newAssignments]);
+
+  // callbacks
+  const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
+    setAssignments((prev) => {
+      const updatedAssignment = [...prev];
+      updatedAssignment[assignmentId].users = selectedUsers;
+      return updatedAssignment;
+    });
+    console.log('assignment',assignments)
   };
 
-  const handleUserChange = (index: number, selectedUsersIds: string[]) => {
-    if (!users) return;
-    const selectedUsers = users?.filter((user) => selectedUsersIds.includes(user.id));
-    setAssignments((prev) => {
-      const updated = [...prev];
-      updated[index].users = selectedUsers;
-      return updated;
-    });
-  };
+  const handleFileDelete = (id:number) => {
+    setAssignments((prevAssignments) => 
+      prevAssignments.filter((_, i) => i !== id)
+    );
+  }
 
   const fileUploadProp: FileUploadProps = {
     accept: 'file/*',
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (
-            event.target.files !== null &&
-            event.target?.files?.length > 0
-        ) {
-          const files = event.target.files;
-          const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
-          setAssignments((prev) => [...prev, ...newAssignments]);
-        }
+      if (event.target.files !== null && event.target?.files?.length > 0) {
+        const files = event.target.files;
+        const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
+        setAssignments((prev) => [...prev, ...newAssignments]);
+      }
     },
     onDrop: (event: React.DragEvent<HTMLElement>) => {
-        console.log(`Drop ${event.dataTransfer.files[0].name}`)
+      console.log(`Drop ${event.dataTransfer.files[0].name}`);
     },
-  }
-  
+  };
+
   return (
     <>
       {/* First card: File upload section */}
@@ -95,7 +78,10 @@ const ActivityDetails = () => {
         <CardContent>
           <Grid container direction="column" justifyContent="center" alignItems="center" spacing={2}>
             <Grid item>
-              <Typography variant="h5" color="secondary">上传文件</Typography> {/* Primary color for text */}
+              <Typography variant="h5" color="secondary">
+                上传文件
+              </Typography>{' '}
+              {/* Primary color for text */}
             </Grid>
             <Grid item>
               <Box mt={2}>
@@ -116,19 +102,31 @@ const ActivityDetails = () => {
           <Grid container direction="column" spacing={3}>
             {assignments.map((assignment, index) => (
               <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
+
                 <Grid item>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
                     {assignment.file?.name}
                   </Typography>
                 </Grid>
                 <Grid item>
-                  <MultiSelect />
+                  <MultiSelect users={users||[]} onChange={(selectedUsers)=>handleUserChange(index,selectedUsers)}/>
+                </Grid>
+                <Grid item>
+                  <Button variant="outlined" color="error" onClick={()=>handleFileDelete(index)}>
+                    删除
+                  </Button>
                 </Grid>
               </Grid>
             ))}
           </Grid>
         </CardContent>
       </Card>
+      
+      <Box display={'flex'} justifyContent={'center'} mt={3}>
+        <Button variant='outlined' color='primary' >
+          提交
+        </Button>
+      </Box>
     </>
   );
 };

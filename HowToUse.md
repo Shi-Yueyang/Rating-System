@@ -223,10 +223,11 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
+- assignment details submit
+- √ assignment details: fetch users
 - √ Creating edit event page: upload file and asign users 
 - √ create dynamic route for event detail page
-- Upload files
-- sign out doesn't work some time
+- ? sign out doesn't work some time
 - √ add permission_class to Event and user
 - √ Admin pannel: view group in admin pannel
 - √ User group: create Expert and Organizer group
