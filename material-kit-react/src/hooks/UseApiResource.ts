@@ -46,7 +46,6 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
         'Content-Type': 'application/json',
       };
       if (accessToken) {
-        
         headers.Authorization = `Bearer ${accessToken}`;
       }
 
