@@ -25,13 +25,12 @@ class UserSerializer(serializers.ModelSerializer):
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
-        fields = ['id', 'file_url','event']
+        fields = ['id', 'resource_file','event']
 
 class AspectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aspect
-        fields = ['id','name', 'description', 'percentage']
-
+        fields = ['id','name', 'description', 'percentage','event']
 
 class EventSerializer(serializers.ModelSerializer):
     aspects = AspectSerializer(many=True)
@@ -48,16 +47,16 @@ class EventSerializer(serializers.ModelSerializer):
             Aspect.objects.create(event=event, **aspect_data)
 
         return event
-        
+
 class UserScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserScore
-        fields = ['id', 'user', 'resource', 'aspect', 'score']
+        fields = ['id', 'user', 'score', 'resource', 'aspect']
 
     def create(self, validated_data):
         try:
             instance = UserScore(**validated_data)
-            instance.clean()
+            instance.clean() # force validation: resource.event must equals to aspect.event
             instance.save()
             return instance
         except ValidationError as e:
@@ -67,7 +66,7 @@ class UserScoreSerializer(serializers.ModelSerializer):
         try:
             for attr,value in validated_data.items():
                 setattr(instance,attr,value)
-            instance.clean()
+            instance.clean() # force validation: resource.event must equals to aspect.event
             instance.save()
             return instance
         except ValidationError as e:

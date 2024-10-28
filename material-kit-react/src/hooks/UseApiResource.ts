@@ -18,8 +18,8 @@ export interface ActivityWithAspect {
   dueDate:string;
   aspects:Aspect[];
 }
-async function fetchData<T>(endPoint:string,headers:Record<string, string>):Promise<T[]>{
-    const response = await axios.get(endPoint,{headers});
+async function fetchData<T>(endPoint:string, headers:Record<string, string>, params?: Record<string,any>):Promise<T[]>{
+    const response = await axios.get(endPoint,{headers,params});
     return response.data;
 }
 
@@ -57,10 +57,10 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
         })
       }
 
-      const useFetchResources = () =>{
+      const useFetchResources = (params?: Record<string, any>) =>{
         return useQuery<T[],Error>({
             queryKey,
-            queryFn: ()=>fetchData<T>(endPoint,headers),
+            queryFn: ()=>fetchData<T>(endPoint,headers,params),
             staleTime: 5*60*1000
         })
       }
