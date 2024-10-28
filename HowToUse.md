@@ -224,6 +224,7 @@ from core.models import CustomUser as User
 
 ## todo
 - assignment details submit
+- √ multiselect onchange
 - √ assignment details: fetch users
 - √ Creating edit event page: upload file and asign users 
 - √ create dynamic route for event detail page

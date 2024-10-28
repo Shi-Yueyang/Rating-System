@@ -15,22 +15,23 @@ interface AssignmentFile {
   users: User[];
 }
 
+interface UserScore {
+  
+}
+
 const ActivityDetails = () => {
   // hooks
   const { id } = useParams();
   const accessToken = localStorage.getItem('custom-auth-token');
-  const { useFetchSingleResource: fetchAcitvity } = UseApiResources<ActivityWithAspect>({
-    endPoint: 'http://127.0.0.1:8000/rate/events/' + id,
-    queryKey: ['events', id as string],
-    accessToken: accessToken,
-  });
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
     endPoint: 'http://127.0.0.1:8000/rate/users/',
     queryKey: ['users'],
     accessToken,
   });
-  const { data: activity } = fetchAcitvity();
+
+
+
   const { data: users } = fetchUsers();
   // states
   const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
@@ -123,7 +124,7 @@ const ActivityDetails = () => {
       </Card>
       
       <Box display={'flex'} justifyContent={'center'} mt={3}>
-        <Button variant='outlined' color='primary' >
+        <Button variant='outlined' color='primary'>
           提交
         </Button>
       </Box>

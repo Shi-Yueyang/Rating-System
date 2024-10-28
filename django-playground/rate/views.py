@@ -28,7 +28,6 @@ class EventViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def create(self, request):
         serializer = EventSerializer(data=request.data)
-        print(request.data)
         if serializer.is_valid():
             event = serializer.save()  # Save the event and aspects
             return Response({'id': event.id}, status=status.HTTP_201_CREATED)
@@ -100,5 +99,13 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
 class UserScoreViewSet(viewsets.ModelViewSet):
-    queryset = UserScore.objects.all()
     serializer_class = UserScoreSerializer
+
+    def get_queryset(self):
+        queryset = UserScore.objects.all()
+        event_id = self.request.query_params.get('event_id')
+        if event_id:
+            queryset = queryset.filter(resource__event_id=event_id)
+            if not queryset.exists():
+                raise NotFound(detail="No UserScores found for the given event ID.")
+        return queryset
