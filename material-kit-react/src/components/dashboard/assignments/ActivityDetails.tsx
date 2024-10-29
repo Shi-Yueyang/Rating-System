@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
 
@@ -15,8 +15,15 @@ interface AssignmentFile {
   users: User[];
 }
 
+interface Resource{
+  id:number
+  resource_file:File;
+}
+
 interface UserScore {
-  
+  id:number;
+  user:User;
+  resource:Resource
 }
 
 const ActivityDetails = () => {
@@ -30,13 +37,48 @@ const ActivityDetails = () => {
     accessToken,
   });
 
+  const{useFetchResources:fetchUserScores} = UseApiResources<UserScore>({
+    endPoint: "http://127.0.0.1:8000/rate/user-scores/",
+    queryKey:['userscore'],
+    accessToken
+  })
 
+  const {data:userScores} = fetchUserScores({event_id: id})
+  const transformUserScoresToAssignments = (userScores: UserScore[]): AssignmentFile[] => {
+    const assignmentMap: { [key: number]: AssignmentFile } = {};
 
-  const { data: users } = fetchUsers();
+    userScores.forEach((userScore) => {
+      const resourceId = userScore.resource.id;
+
+      // If the resource ID isn't in the map, initialize it with the file and an empty users array
+      if (!assignmentMap[resourceId]) {
+        assignmentMap[resourceId] = {
+          file: userScore.resource.resource_file,
+          users: [],
+        };
+      }
+
+      // Add the user to the users array for this resource
+      assignmentMap[resourceId].users.push(userScore.user);
+    });
+
+    // Convert the map to an array of AssignmentFile objects
+    return Object.values(assignmentMap);
+  };
+
   // states
   const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const initializeAssignments = () => {
+    const transformedAssignments = transformUserScoresToAssignments(userScores||[]);
+    setAssignments(transformedAssignments);
+  };
 
+  // without useEffect, will cause infinite rerender
+  useEffect(() => {
+    initializeAssignments();
+  }, [userScores]);
+  
+  const { data: users } = fetchUsers();
   // callbacks
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
     setAssignments((prev) => {
