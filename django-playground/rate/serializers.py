@@ -49,6 +49,8 @@ class EventSerializer(serializers.ModelSerializer):
         return event
 
 class UserScoreSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    resource = ResourceSerializer()
     class Meta:
         model = UserScore
         fields = ['id', 'user', 'score', 'resource', 'aspect']
