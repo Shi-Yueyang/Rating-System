@@ -6,18 +6,21 @@ import { User } from "@/types/user";
 
 interface Props{
   users:User[];
+  selectedUsers:User[];
   onChange:(selectedUsers:User[])=>void
 }
 
-export default function MultiSelect({users,onChange}:Props) {
+export default function MultiSelect({users,selectedUsers,onChange}:Props) {
   return (
     <Autocomplete
       sx={{ m: 1, width: 500 }}
       multiple
       options={users}
+      value={selectedUsers}
       getOptionLabel={(option) => option.username||' '}
       disableCloseOnSelect
-      onChange ={(_, selectedUsers) => onChange(selectedUsers)}
+      isOptionEqualToValue={(option,value)=>option.id == value.id}
+      onChange ={(_, newSelectedUsers) => onChange(newSelectedUsers)}
       renderInput={(params) => (
         <TextField
           {...params}
