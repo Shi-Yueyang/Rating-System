@@ -11,13 +11,13 @@ import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
 
 interface AssignmentFile {
-  file: File | null;
+  file: File|string;
   users: User[];
 }
 
 interface Resource{
   id:number
-  resource_file:File;
+  resource_file:string;
 }
 
 interface UserScore {
@@ -50,7 +50,6 @@ const ActivityDetails = () => {
     userScores.forEach((userScore) => {
       const resourceId = userScore.resource.id;
 
-      // If the resource ID isn't in the map, initialize it with the file and an empty users array
       if (!assignmentMap[resourceId]) {
         assignmentMap[resourceId] = {
           file: userScore.resource.resource_file,
@@ -58,7 +57,6 @@ const ActivityDetails = () => {
         };
       }
 
-      // Add the user to the users array for this resource
       assignmentMap[resourceId].users.push(userScore.user);
     });
 
@@ -73,11 +71,15 @@ const ActivityDetails = () => {
     setAssignments(transformedAssignments);
   };
 
-  // without useEffect, will cause infinite rerender
+  // without useEffect, it will cause infinite rerender
   useEffect(() => {
     initializeAssignments();
   }, [userScores]);
-  
+
+  useEffect(()=>{
+    console.log(assignments);
+  },[assignments])
+
   const { data: users } = fetchUsers();
   // callbacks
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
@@ -148,7 +150,10 @@ const ActivityDetails = () => {
 
                 <Grid item>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                    {assignment.file?.name}
+                    {typeof assignment.file == 'string'
+                    ? assignment.file.split('/').pop()
+                    : assignment.file.name
+                    }
                   </Typography>
                 </Grid>
                 <Grid item>
