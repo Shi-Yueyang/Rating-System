@@ -223,7 +223,7 @@ from core.models import CustomUser as User
 - how does user-context.tsx work: Defining a context interface, a contex, a provider and create a custom hook in use-user.ts
 
 ## todo
-- assignment details fetch existing data
+- assignment details: fetch existing data
 - √ use event_id to filter userscore
 - √ multiselect onchange
 - √ assignment details: fetch users
