@@ -11,19 +11,19 @@ import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
 
 interface AssignmentFile {
-  file: File|string;
+  file: File | string;
   users: User[];
 }
 
-interface Resource{
-  id:number
-  resource_file:string;
+interface Resource {
+  id: number;
+  resource_file: string;
 }
 
 interface UserScore {
-  id:number;
-  user:User;
-  resource:Resource
+  id: number;
+  user: User;
+  resource: Resource;
 }
 
 const ActivityDetails = () => {
@@ -37,13 +37,13 @@ const ActivityDetails = () => {
     accessToken,
   });
 
-  const{useFetchResources:fetchUserScores} = UseApiResources<UserScore>({
-    endPoint: "http://127.0.0.1:8000/rate/user-scores/",
-    queryKey:['userscore'],
-    accessToken
-  })
+  const { useFetchResources: fetchUserScores } = UseApiResources<UserScore>({
+    endPoint: 'http://127.0.0.1:8000/rate/user-scores/',
+    queryKey: ['userscore'],
+    accessToken,
+  });
 
-  const {data:userScores} = fetchUserScores({event_id: id})
+  const { data: userScores } = fetchUserScores({ event_id: id });
   const transformUserScoresToAssignments = (userScores: UserScore[]): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
 
@@ -56,8 +56,13 @@ const ActivityDetails = () => {
           users: [],
         };
       }
-
-      assignmentMap[resourceId].users.push(userScore.user);
+      
+      const userExist = assignmentMap[resourceId].users.some(
+        (existingUser) => existingUser.id == userScore.user.id
+      )
+      if(!userExist){
+        assignmentMap[resourceId].users.push(userScore.user);
+      }
     });
 
     // Convert the map to an array of AssignmentFile objects
@@ -67,7 +72,7 @@ const ActivityDetails = () => {
   // states
   const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
   const initializeAssignments = () => {
-    const transformedAssignments = transformUserScoresToAssignments(userScores||[]);
+    const transformedAssignments = transformUserScoresToAssignments(userScores || []);
     setAssignments(transformedAssignments);
   };
 
@@ -76,9 +81,6 @@ const ActivityDetails = () => {
     initializeAssignments();
   }, [userScores]);
 
-  useEffect(()=>{
-    console.log(assignments);
-  },[assignments])
 
   const { data: users } = fetchUsers();
   // callbacks
@@ -88,14 +90,11 @@ const ActivityDetails = () => {
       updatedAssignment[assignmentId].users = selectedUsers;
       return updatedAssignment;
     });
-    console.log('assignment',assignments)
   };
 
-  const handleFileDelete = (id:number) => {
-    setAssignments((prevAssignments) => 
-      prevAssignments.filter((_, i) => i !== id)
-    );
-  }
+  const handleFileDelete = (id: number) => {
+    setAssignments((prevAssignments) => prevAssignments.filter((_, i) => i !== id));
+  };
 
   const fileUploadProp: FileUploadProps = {
     accept: 'file/*',
@@ -147,20 +146,20 @@ const ActivityDetails = () => {
           <Grid container direction="column" spacing={3}>
             {assignments.map((assignment, index) => (
               <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
-
                 <Grid item>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                    {typeof assignment.file == 'string'
-                    ? assignment.file.split('/').pop()
-                    : assignment.file.name
-                    }
+                    {typeof assignment.file == 'string' ? assignment.file.split('/').pop() : assignment.file.name}
                   </Typography>
                 </Grid>
                 <Grid item>
-                  <MultiSelect users={users||[]} onChange={(selectedUsers)=>handleUserChange(index,selectedUsers)}/>
+                  <MultiSelect
+                    users={users || []}
+                    onChange={(selectedUsers) => handleUserChange(index, selectedUsers)}
+                    selectedUsers={assignment.users}
+                  />
                 </Grid>
                 <Grid item>
-                  <Button variant="outlined" color="error" onClick={()=>handleFileDelete(index)}>
+                  <Button variant="outlined" color="error" onClick={() => handleFileDelete(index)}>
                     删除
                   </Button>
                 </Grid>
@@ -169,9 +168,9 @@ const ActivityDetails = () => {
           </Grid>
         </CardContent>
       </Card>
-      
+
       <Box display={'flex'} justifyContent={'center'} mt={3}>
-        <Button variant='outlined' color='primary'>
+        <Button variant="outlined" color="primary">
           提交
         </Button>
       </Box>
