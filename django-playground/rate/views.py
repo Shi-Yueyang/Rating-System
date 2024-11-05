@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 from rest_framework import status
 from .models import Event, Resource, Aspect, User, UserScore
-from .serializers import *
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -9,6 +8,7 @@ from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
 from core.permissions import IsAdminOrOrganizer
+from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer, UserScoreSerializer,UserScoreSimpleSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -101,6 +101,11 @@ class UserViewSet(viewsets.ModelViewSet):
 class UserScoreViewSet(viewsets.ModelViewSet):
     serializer_class = UserScoreSerializer
 
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'POST']:
+            return UserScoreSimpleSerializer
+        return UserScoreSerializer
+    
     def get_queryset(self):
         queryset = UserScore.objects.all()
         event_id = self.request.query_params.get('event_id')

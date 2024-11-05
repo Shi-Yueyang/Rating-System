@@ -17,7 +17,8 @@ interface AssignmentFile {
 
 interface Resource {
   id: number;
-  resource_file: string;
+  resource_file: File;
+  event:number;
 }
 
 interface UserScore {
@@ -26,9 +27,11 @@ interface UserScore {
   resource: Resource;
 }
 
+
+
 const ActivityDetails = () => {
   // hooks
-  const { id } = useParams();
+  const { id: event_id } = useParams();
   const accessToken = localStorage.getItem('custom-auth-token');
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
@@ -43,7 +46,14 @@ const ActivityDetails = () => {
     accessToken,
   });
 
-  const { data: userScores } = fetchUserScores({ event_id: id });
+  const{useMutateResources: useMutateResources} =  UseApiResources({
+    endPoint: 'http://127.0.0.1:8000/rate/resources/',
+    queryKey: ['resources'],
+    accessToken,
+  })
+  const {mutate:mutateResources} = useMutateResources('POST')
+  const { data: userScores } = fetchUserScores({ event_id: event_id });
+
   const transformUserScoresToAssignments = (userScores: UserScore[]): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
 
@@ -96,11 +106,20 @@ const ActivityDetails = () => {
     setAssignments((prevAssignments) => prevAssignments.filter((_, i) => i !== id));
   };
 
+  const handleFileChange = ()=>{
+    // to do something  
+  }
+
   const fileUploadProp: FileUploadProps = {
     accept: 'file/*',
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
         const files = event.target.files;
+        const formData = new FormData();
+        formData.append('resource_file', files[0]);
+        formData.append('event', String(event_id));
+        console.log('formData', formData);
+        mutateResources(formData);
         const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
         setAssignments((prev) => [...prev, ...newAssignments]);
       }
@@ -170,7 +189,7 @@ const ActivityDetails = () => {
       </Card>
 
       <Box display={'flex'} justifyContent={'center'} mt={3}>
-        <Button variant="outlined" color="primary">
+        <Button variant="outlined" color="primary" onClick={handleFileChange}>
           提交
         </Button>
       </Box>
