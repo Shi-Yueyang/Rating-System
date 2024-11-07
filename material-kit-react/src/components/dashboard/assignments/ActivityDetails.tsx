@@ -46,16 +46,33 @@ const ActivityDetails = () => {
     accessToken,
   });
 
-  const{useMutateResources: useMutateResources} =  UseApiResources({
+  const { useMutateResources } = UseApiResources<FormData>({
     endPoint: 'http://127.0.0.1:8000/rate/resources/',
     queryKey: ['resources'],
     accessToken,
-  })
+    contentType: 'multipart/form-data'
+  });
+  
+  const { useFetchResources: fetchResources } = UseApiResources<Resource>({
+    endPoint: 'http://127.0.0.1:8000/rate/resources/',
+    queryKey: ['resources'],
+    accessToken,
+  });
+
+  // call hooks
   const {mutate:mutateResources} = useMutateResources('POST')
   const { data: userScores } = fetchUserScores({ event_id: event_id });
+  const {data:resources} = fetchResources({event_id:event_id})
+  
 
   const transformUserScoresToAssignments = (userScores: UserScore[]): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
+    resources?.forEach((resource) => {
+      assignmentMap[resource.id] = {
+        file: resource.resource_file,
+        users: [],
+      };
+    });
 
     userScores.forEach((userScore) => {
       const resourceId = userScore.resource.id;
@@ -75,7 +92,6 @@ const ActivityDetails = () => {
       }
     });
 
-    // Convert the map to an array of AssignmentFile objects
     return Object.values(assignmentMap);
   };
 
@@ -118,7 +134,7 @@ const ActivityDetails = () => {
         const formData = new FormData();
         formData.append('resource_file', files[0]);
         formData.append('event', String(event_id));
-        console.log('formData', formData);
+
         mutateResources(formData);
         const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
         setAssignments((prev) => [...prev, ...newAssignments]);
