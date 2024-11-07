@@ -37,13 +37,13 @@ async function mutateData<T>(endPoint:string, data:T,config:AxiosRequestConfig):
 interface Props{
     endPoint:string;
     accessToken?:string|null;
-    queryKey:string[]
+    queryKey:string[];
+    contentType?: 'application/json' | 'multipart/form-data';
 }
 
-export function UseApiResources<T>({endPoint,accessToken,queryKey}:Props){
+export function UseApiResources<T>({endPoint,accessToken,queryKey,contentType='application/json'}:Props){
     const headers: Record<string, string> = {
-        // 'Content-Type': 'multipart/form-data',
-        'Content-Type': 'application/json',
+        'Content-Type': contentType,
       };
       if (accessToken) {
         headers.Authorization = `Bearer ${accessToken}`;
