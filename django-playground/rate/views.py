@@ -98,13 +98,8 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(user)
         return Response(serializer.data)
     
-class UserScoreViewSet(viewsets.ModelViewSet):
-    serializer_class = UserScoreSerializer
-
-    def get_serializer_class(self):
-        if self.request.method in ['PUT', 'POST']:
-            return UserScoreSimpleSerializer
-        return UserScoreSerializer
+class UserScoreViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserScoreSimpleSerializer
     
     def get_queryset(self):
         queryset = UserScore.objects.all()

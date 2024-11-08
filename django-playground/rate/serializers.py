@@ -58,7 +58,7 @@ class UserScoreSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             instance = UserScore(**validated_data)
-            instance.clean() # force validation: resource.event must equals to aspect.event
+            instance.clean() 
             instance.save()
             return instance
         except ValidationError as e:
@@ -68,7 +68,7 @@ class UserScoreSerializer(serializers.ModelSerializer):
         try:
             for attr,value in validated_data.items():
                 setattr(instance,attr,value)
-            instance.clean() # force validation: resource.event must equals to aspect.event
+            instance.clean() 
             instance.save()
             return instance
         except ValidationError as e:
@@ -80,21 +80,3 @@ class UserScoreSimpleSerializer(serializers.ModelSerializer):
         model = UserScore
         fields = ['id', 'score', 'aspect','resource','user']
     
-    def create(self, validated_data):
-        try:
-            instance = UserScore(**validated_data)
-            instance.clean() # force validation: resource.event must equals to aspect.event
-            instance.save()
-            return instance
-        except ValidationError as e:
-            raise serializers.ValidationError(e.message)
-    
-    def update(self, instance, validated_data):
-        try:
-            for attr,value in validated_data.items():
-                setattr(instance,attr,value)
-            instance.clean() # force validation: resource.event must equals to aspect.event
-            instance.save()
-            return instance
-        except ValidationError as e:
-            raise serializers.ValidationError(e.message)
