@@ -23,8 +23,8 @@ interface Resource {
 
 interface UserScore {
   id: number;
-  user: User;
-  resource: Resource;
+  user: number;
+  resource: number;
 }
 
 
@@ -61,11 +61,12 @@ const ActivityDetails = () => {
 
   // call hooks
   const {mutate:mutateResources} = useMutateResources('POST')
+  const { data: users } = fetchUsers();
   const { data: userScores } = fetchUserScores({ event_id: event_id });
   const {data:resources} = fetchResources({event_id:event_id})
   
 
-  const transformUserScoresToAssignments = (userScores: UserScore[]): AssignmentFile[] => {
+  const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
     resources?.forEach((resource) => {
       assignmentMap[resource.id] = {
@@ -74,22 +75,13 @@ const ActivityDetails = () => {
       };
     });
 
-    userScores.forEach((userScore) => {
-      const resourceId = userScore.resource.id;
+    userScores?.forEach((userScore) => {
+      const resourceId = userScore.resource;
+      const foundUser = users?.find((user) => user.id === userScore.user);
+      if (foundUser) {
+        assignmentMap[resourceId].users.push(foundUser);
+      }
 
-      if (!assignmentMap[resourceId]) {
-        assignmentMap[resourceId] = {
-          file: userScore.resource.resource_file,
-          users: [],
-        };
-      }
-      
-      const userExist = assignmentMap[resourceId].users.some(
-        (existingUser) => existingUser.id == userScore.user.id
-      )
-      if(!userExist){
-        assignmentMap[resourceId].users.push(userScore.user);
-      }
     });
 
     return Object.values(assignmentMap);
@@ -98,17 +90,17 @@ const ActivityDetails = () => {
   // states
   const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
   const initializeAssignments = () => {
-    const transformedAssignments = transformUserScoresToAssignments(userScores || []);
+    const transformedAssignments = transformUserScoresToAssignments();
     setAssignments(transformedAssignments);
   };
 
   // without useEffect, it will cause infinite rerender
   useEffect(() => {
     initializeAssignments();
-  }, [userScores]);
+  }, [userScores,resources]);
 
 
-  const { data: users } = fetchUsers();
+
   // callbacks
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
     setAssignments((prev) => {
@@ -131,11 +123,6 @@ const ActivityDetails = () => {
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
         const files = event.target.files;
-        const formData = new FormData();
-        formData.append('resource_file', files[0]);
-        formData.append('event', String(event_id));
-
-        mutateResources(formData);
         const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
         setAssignments((prev) => [...prev, ...newAssignments]);
       }
