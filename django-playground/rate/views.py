@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework import status
-from .models import Event, Resource, Aspect, User, UserScore
+from .models import Event, Resource, Aspect, User, UserResource
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
 from core.permissions import IsAdminOrOrganizer
-from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer, UserScoreSerializer,UserScoreSimpleSerializer
+from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer, UserResourceSerializer, UserResourceReadSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -27,9 +27,11 @@ class EventViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def create(self, request):
+        print('Creating event')
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
-            event = serializer.save()  # Save the event and aspects
+            print('Validated')
+            event = serializer.save()
             return Response({'id': event.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -63,6 +65,15 @@ class AspectViewSet(viewsets.ModelViewSet):
     queryset = Aspect.objects.all()
     serializer_class = AspectSerializer
 
+    def get_queryset(self):
+        event_id = self.request.query_params.get('event_id')
+        if event_id:
+            queryset = Aspect.objects.filter(event_id=event_id)
+            if not queryset.exists():
+                raise NotFound(detail="No Aspects found for the given event ID.")
+            return queryset
+        return super().get_queryset()
+    
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -98,14 +109,65 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(user)
         return Response(serializer.data)
     
-class UserScoreViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = UserScoreSimpleSerializer
+class UserResourceViewSet(viewsets.ModelViewSet):
+    def get_serializer(self, *args, **kwargs):
+        if self.action in ['list', 'retrieve']:
+            return UserResourceReadSerializer(*args, **kwargs)
+        return UserResourceSerializer(*args, **kwargs)
     
     def get_queryset(self):
-        queryset = UserScore.objects.all()
+        queryset = UserResource.objects.all()
         event_id = self.request.query_params.get('event_id')
         if event_id:
             queryset = queryset.filter(resource__event_id=event_id)
             if not queryset.exists():
                 raise NotFound(detail="No UserScores found for the given event ID.")
         return queryset
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @transaction.atomic
+    def bulk_create(self, request):
+        user_resource_pairs = []
+        for key, value in request.data.items():
+            index = int(key.split('_')[1])
+            field = key.split('_')[2]
+            if len(user_resource_pairs) <= index:
+                user_resource_pairs.append({})
+            user_resource_pairs[index][field] = value
+        created_resources = []
+        for pair in user_resource_pairs:
+            user_id = pair.get('user')
+            resource_id = pair.get('resource')
+            resource_file = pair.get('resourcefile')
+            event_id = pair.get('event')
+
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return Response({'error': f'User with id {user_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if resource_id:
+                try:
+                    resource = Resource.objects.get(pk=resource_id)
+                except Resource.DoesNotExist:
+                    return Response({'error': f'Resource with id {resource_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                try:
+                    event = Event.objects.get(pk=event_id)
+                except Event.DoesNotExist:
+                    return Response({'error': f'Event with id {event_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+                resource_serializer = ResourceSerializer(data={'resource_file': resource_file, 'event': event.id})
+                
+                try:
+                    resource_serializer.is_valid(raise_exception=True)
+                    resource = resource_serializer.save()
+                except Exception:
+                    return Response(resource_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            user_resource, created = UserResource.objects.get_or_create(user=user, resource=resource)
+            if not created:
+                user_resource.save()
+                created_resources.append(user_resource)
+
+        return Response( status=status.HTTP_201_CREATED)

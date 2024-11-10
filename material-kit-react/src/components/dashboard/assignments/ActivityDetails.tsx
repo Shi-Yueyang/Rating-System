@@ -3,25 +3,27 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 import { User } from '@/types/user';
 import { ActivityWithAspect, UseApiResources } from '@/hooks/UseApiResource';
 
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
-
-interface AssignmentFile {
-  file: File | string;
-  users: User[];
-}
+import { paths } from '@/paths';
 
 interface Resource {
   id: number;
-  resource_file: File;
+  resource_file: string;
   event:number;
 }
 
-interface UserScore {
+interface AssignmentFile {
+  file: File | Resource;
+  users: User[];
+}
+
+interface UserResource {
   id: number;
   user: number;
   resource: number;
@@ -31,6 +33,7 @@ interface UserScore {
 
 const ActivityDetails = () => {
   // hooks
+  const router = useRouter();
   const { id: event_id } = useParams();
   const accessToken = localStorage.getItem('custom-auth-token');
 
@@ -40,49 +43,50 @@ const ActivityDetails = () => {
     accessToken,
   });
 
-  const { useFetchResources: fetchUserScores } = UseApiResources<UserScore>({
-    endPoint: 'http://127.0.0.1:8000/rate/user-scores/',
+  const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
+    endPoint: 'http://127.0.0.1:8000/rate/user-resource/',
     queryKey: ['userscore'],
     accessToken,
   });
-
-  const { useMutateResources } = UseApiResources<FormData>({
-    endPoint: 'http://127.0.0.1:8000/rate/resources/',
-    queryKey: ['resources'],
+  const {useMutateResources:useMutateUserResources } = UseApiResources<UserResource>({
+    endPoint: 'http://127.0.0.1:8000/rate/user-resource/bulk_create/',
+    queryKey: ['userscore'],
     accessToken,
     contentType: 'multipart/form-data'
   });
-  
+  const {mutate:mutateUserResources} = useMutateUserResources('POST');
+
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
     endPoint: 'http://127.0.0.1:8000/rate/resources/',
     queryKey: ['resources'],
     accessToken,
   });
-
-  // call hooks
-  const {mutate:mutateResources} = useMutateResources('POST')
-  const { data: users } = fetchUsers();
-  const { data: userScores } = fetchUserScores({ event_id: event_id });
-  const {data:resources} = fetchResources({event_id:event_id})
   
 
+  // call hooks
+  const { data: users } = fetchUsers();
+  const { data: userResources } = fetchUserResource({ event_id: event_id });
+  const {data:resources} = fetchResources({event_id:event_id});
+
+  
   const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
     resources?.forEach((resource) => {
       assignmentMap[resource.id] = {
-        file: resource.resource_file,
+        file: resource,
         users: [],
       };
     });
 
-    userScores?.forEach((userScore) => {
-      const resourceId = userScore.resource;
-      const foundUser = users?.find((user) => user.id === userScore.user);
-      if (foundUser) {
-        assignmentMap[resourceId].users.push(foundUser);
-      }
-
-    });
+    if (userResources && users) {
+      userResources.forEach((userResource) => {
+        const resourceId = userResource.resource;
+        const foundUser = users.find((user) => user.id === userResource.user);
+        if (foundUser && assignmentMap[resourceId]) {
+          assignmentMap[resourceId].users.push(foundUser);
+        }
+      });
+    }
 
     return Object.values(assignmentMap);
   };
@@ -97,9 +101,7 @@ const ActivityDetails = () => {
   // without useEffect, it will cause infinite rerender
   useEffect(() => {
     initializeAssignments();
-  }, [userScores,resources]);
-
-
+  }, [userResources,resources]);
 
   // callbacks
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
@@ -114,9 +116,33 @@ const ActivityDetails = () => {
     setAssignments((prevAssignments) => prevAssignments.filter((_, i) => i !== id));
   };
 
-  const handleFileChange = ()=>{
-    // to do something  
-  }
+  const handleFileChange = () => {
+    const userResourcePairs = assignments.flatMap((assignment) =>
+      assignment.users.map((user) => ({
+        user: user.id,
+        resource: assignment.file instanceof File ? assignment.file : (assignment.file as Resource).id,
+      }))
+
+    );
+    const formData = new FormData();
+    userResourcePairs.forEach((pair, index) => {
+      formData.append(`userResourcePairs_${index}_user`, pair.user.toString());
+      if (pair.resource instanceof File) {
+        formData.append(`userResourcePairs_${index}_resourcefile`, pair.resource);
+        formData.append(`userResourcePairs_${index}_event`, event_id.toString());
+      } else {
+        formData.append(`userResourcePairs_${index}_resource`, pair.resource.toString());
+      }
+    });
+
+    mutateUserResources(formData, {
+      onSuccess: () => {
+        router.push(paths.dashboard.activity);
+      },
+    });
+    mutateUserResources(formData);
+
+  };
 
   const fileUploadProp: FileUploadProps = {
     accept: 'file/*',
@@ -170,7 +196,9 @@ const ActivityDetails = () => {
               <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
                 <Grid item>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                    {typeof assignment.file == 'string' ? assignment.file.split('/').pop() : assignment.file.name}
+                    {assignment.file instanceof File 
+                    ? assignment.file.name 
+                    : (assignment.file as Resource).resource_file.split('/').pop()}
                   </Typography>
                 </Grid>
                 <Grid item>
