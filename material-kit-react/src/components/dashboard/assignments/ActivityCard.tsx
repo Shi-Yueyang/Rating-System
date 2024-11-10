@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { paths } from '@/paths';
 
 
-
 interface Props {
   activity: Activity;
 }
