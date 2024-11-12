@@ -139,6 +139,7 @@ const ActivityDetails = () => {
       onSuccess: () => {
         router.push(paths.dashboard.activity);
       },
+
     });
     mutateUserResources(formData);
 
