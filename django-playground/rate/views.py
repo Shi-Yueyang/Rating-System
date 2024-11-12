@@ -134,6 +134,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             if len(user_resource_pairs) <= index:
                 user_resource_pairs.append({})
             user_resource_pairs[index][field] = value
+        
         created_resources = []
         for pair in user_resource_pairs:
             user_id = pair.get('user')
@@ -169,5 +170,4 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             if not created:
                 user_resource.save()
                 created_resources.append(user_resource)
-
         return Response( status=status.HTTP_201_CREATED)
