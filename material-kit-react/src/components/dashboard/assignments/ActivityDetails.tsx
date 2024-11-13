@@ -1,12 +1,12 @@
 'use client';
 
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 import { User } from '@/types/user';
-import { ActivityWithAspect, UseApiResources } from '@/hooks/UseApiResource';
+import { UseApiResources } from '@/hooks/UseApiResource';
 
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
@@ -141,8 +141,6 @@ const ActivityDetails = () => {
       },
 
     });
-    mutateUserResources(formData);
-
   };
 
   const fileUploadProp: FileUploadProps = {
