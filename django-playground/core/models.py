@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/',null=True,blank=True)
-
+    realname = models.CharField(max_length=100, null=True, blank=True)
     def save(self,*args,**kwargs):
         if not self.password.startswith("pbkdf2_"):
             print('aaa')

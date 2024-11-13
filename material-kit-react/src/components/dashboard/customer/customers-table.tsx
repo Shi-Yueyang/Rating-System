@@ -17,25 +17,18 @@ import Typography from '@mui/material/Typography';
 import dayjs from 'dayjs';
 
 import { useSelection } from '@/hooks/use-selection';
+import { User } from '@/types/user';
 
 function noop(): void {
   // do nothing
 }
 
-export interface Customer {
-  id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  address: { city: string; state: string; country: string; street: string };
-  phone: string;
-  createdAt: Date;
-}
+
 
 interface CustomersTableProps {
   count?: number;
   page?: number;
-  rows?: Customer[];
+  rows?: User[];
   rowsPerPage?: number;
 }
 
@@ -49,10 +42,7 @@ export function CustomersTable({
     return rows.map((customer) => customer.id);
   }, [rows]);
 
-  const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
-
-  const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
-  const selectedAll = rows.length > 0 && selected?.size === rows.length;
+  const { selected } = useSelection(rowIds);
 
   return (
     <Card>
@@ -60,24 +50,8 @@ export function CustomersTable({
         <Table sx={{ minWidth: '800px' }}>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedAll}
-                  indeterminate={selectedSome}
-                  onChange={(event) => {
-                    if (event.target.checked) {
-                      selectAll();
-                    } else {
-                      deselectAll();
-                    }
-                  }}
-                />
-              </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Signed Up</TableCell>
+              <TableCell>姓名</TableCell>
+              <TableCell>邮箱</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -86,30 +60,15 @@ export function CustomersTable({
 
               return (
                 <TableRow hover key={row.id} selected={isSelected}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={(event) => {
-                        if (event.target.checked) {
-                          selectOne(row.id);
-                        } else {
-                          deselectOne(row.id);
-                        }
-                      }}
-                    />
-                  </TableCell>
+
                   <TableCell>
                     <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
                       <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.name}</Typography>
+                      <Typography variant="subtitle2">{row.realname}</Typography>
                     </Stack>
                   </TableCell>
                   <TableCell>{row.email}</TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.phone}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
+
                 </TableRow>
               );
             })}
