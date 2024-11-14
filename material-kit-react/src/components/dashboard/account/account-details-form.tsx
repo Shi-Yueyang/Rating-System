@@ -15,10 +15,12 @@ import Grid from '@mui/material/Unstable_Grid2';
 
 import { useUser } from '@/hooks/use-user';
 import useUploadUser from '@/hooks/UseUpload';
-import { Alert, Snackbar } from '@mui/material';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import {User} from '@/types/user';
+import { UseApiResources } from '@/hooks/UseApiResource';
+
 
 interface Props {
   avatarFile: File | null;
@@ -26,12 +28,23 @@ interface Props {
 const userSchema = z.object({
   username: z.string().min(1, "用户名不能为空").max(20, "用户名不能超过20个字符"),
   email: z.string().email("请输入有效的邮箱地址"),
+  realname: z.string(),
 });
 
 export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
+
+  // hooks
   const { user } = useUser();
-  const uploadUser = useUploadUser({});
-  
+  const accessToken = localStorage.getItem('custom-auth-token');
+  const{useMutateResources:useMutateUser} = UseApiResources<User>({
+    endPoint: 'http://127.0.0.1:8000/rate/users/'+user?.id+'/',
+    queryKey: ['users', String(user?.id)],
+    accessToken,
+  })
+  const {mutate:mutateUsers,isPending,isError,error} = useMutateUser('PATCH');
+
+
+
   const {
     control,
     handleSubmit,
@@ -41,19 +54,22 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
     defaultValues: {
       username: user?.username || '',
       email: user?.email || '',
+      realname: user?.realname || '',
     },
   });
 
 
-  const onSubmit = (data: { username: string; email: string }) => {
+  const onSubmit = (data: { username: string; email: string; realname:string }) => {
     if(user)
     {
-      const updatedUser = {
-        ...user,
-        username: data.username, 
-        email: data.email, 
-      };
-      uploadUser.mutate({ user: updatedUser, avatarFile });
+      const formData = new FormData();
+      formData.append('username', data.username);
+      formData.append('email', data.email);
+      formData.append('realname', data.realname);
+      if (avatarFile) {
+        formData.append('avatar', avatarFile);
+      }
+      mutateUsers(formData);
     }
   };
 
@@ -76,7 +92,6 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
                   )}
                 />
                 {errors.username && <p style={{ color: 'red' }}>{errors.username.message}</p>}
-
               </FormControl>
             </Grid>
 
@@ -93,19 +108,36 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
                 {errors.email && <p style={{ color: 'red' }}>{errors.email.message}</p>}
               </FormControl>
             </Grid>
+
+            <Grid md={6} xs={12}>
+              <FormControl fullWidth>
+                <InputLabel>真实姓名</InputLabel>
+                <Controller
+                  name="realname"
+                  control={control}
+                  rules={{ required: false }}
+                  render={({ field }) => (
+                    <OutlinedInput {...field} label="真实姓名" />
+                  )}
+                />
+              </FormControl>
+            </Grid>
+            
+
+            
           </Grid>
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button type="submit" variant="contained" disabled={uploadUser.isPending}>
+          <Button type="submit" variant="contained" disabled={isPending}>
            提交
           </Button>
         </CardActions>
       </Card>
 
-      {uploadUser.isError && (
+      {isError && (
         <div>
-          <p>Error uploading data: {uploadUser.error?.message}</p>
+          <p>Error uploading data: {error?.message}</p>
         </div>
       )}
     </form>
