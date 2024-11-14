@@ -30,8 +30,16 @@ async function fetchSingleData<T>(endPoint:string,headers:Record<string, string>
 
 
 async function mutateData<T>(endPoint:string, data:T|FormData,config:AxiosRequestConfig):Promise<T>{
-    const response = await axios.post(endPoint,data,config);
+  console.log('method',config.method);
+  if (config.method === 'POST') {
+    const response = await axios.post(endPoint, data, config);
     return response.data;
+  } else if (config.method === 'PATCH') {
+    const response = await axios.patch(endPoint, data, config);
+    return response.data;
+  } else {
+    throw new Error('Invalid method');
+  }
 }
 
 interface Props{
