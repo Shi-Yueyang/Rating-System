@@ -4,7 +4,6 @@ import Container from '@mui/material/Container';
 import GlobalStyles from '@mui/material/GlobalStyles';
 
 import { AuthGuard } from '@/components/auth/auth-guard';
-import { MainNav } from '@/components/dashboard/layout/main-nav';
 import { SideNav } from '@/components/dashboard/layout/side-nav';
 
 interface LayoutProps {
@@ -37,7 +36,6 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
       >
         <SideNav />
         <Box sx={{ display: 'flex', flex: '1 1 auto', flexDirection: 'column', pl: { lg: 'var(--SideNav-width)' } }}>
-          <MainNav />
           <main>
             <Container maxWidth="xl" sx={{ py: '64px' }}>
               {children}

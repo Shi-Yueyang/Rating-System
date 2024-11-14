@@ -2,10 +2,7 @@ import type { NavItemConfig } from '@/types/nav';
 import { paths } from '@/paths';
 
 export const navItems = [
-  { key: 'overview', title: 'Overview', href: paths.dashboard.overview, icon: 'chart-pie' },
   { key: 'activity', title: '活动', href: paths.dashboard.activity, icon: 'chart-pie' }, // newly added
-  { key: 'customers', title: 'Customers', href: paths.dashboard.customers, icon: 'users' },
-  { key: 'integrations', title: 'Integrations', href: paths.dashboard.integrations, icon: 'plugs-connected' },
-  { key: 'settings', title: 'Settings', href: paths.dashboard.settings, icon: 'gear-six' },
-  { key: 'account', title: 'Account', href: paths.dashboard.account, icon: 'user' },
+  { key: 'customers', title: '用户', href: paths.dashboard.customers, icon: 'users' },
+  { key: 'account', title: '账户', href: paths.dashboard.account, icon: 'user' },
 ] satisfies NavItemConfig[];
