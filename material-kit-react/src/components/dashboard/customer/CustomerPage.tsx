@@ -14,7 +14,7 @@ const CustomerPage = () => {
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
     endPoint: 'http://127.0.0.1:8000/rate/users/',
-    queryKey: ['users'],
+    queryKey: ['usersall'],
     accessToken,
   });
 

@@ -1,26 +1,28 @@
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@mui/material';
-import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Unstable_Grid2';
+import { Grid, Stack, Typography } from '@mui/material';
 
+import { User } from '@/types/user';
 import { paths } from '@/paths';
+import { useUser } from '@/hooks/use-user';
 import { Activity, UseApiResources } from '@/hooks/UseApiResource';
-import ActivityCard from '@/components/dashboard/assignments/ActivityCard';
 
-const ActivityPage = () => {
+import ActivityCard from '../assignments/ActivityCard';
+
+const RatingPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
+  const { user } = useUser();
+
   const { useFetchResources: useActivities } = UseApiResources<Activity>({
     endPoint: 'http://127.0.0.1:8000/rate/events/',
     accessToken,
-    queryKey: ['activity'],
+    queryKey: ['activityuser'],
   });
-  const { data: activities } = useActivities();
+
+  const { data: activities } = useActivities({ user_id: user?.id });
   const router = useRouter();
-  const handleCreateAssignment = () => {
-    router.push(paths.createEvent); // Navigate to the page where new assignments can be created
-  };
 
   return (
     <Stack spacing={3}>
@@ -31,18 +33,14 @@ const ActivityPage = () => {
             <ActivityCard
               activity={activity}
               onClick={() => {
-                router.push(paths.eventDetails + activity.id);
+                router.push(paths.ratingDetails + activity.id);
               }}
             ></ActivityCard>
           </Grid>
         ))}
       </Grid>
-      {/* new activity */}
-      <Button variant="outlined" onClick={handleCreateAssignment}>
-        新建活动
-      </Button>
     </Stack>
   );
 };
 
-export default ActivityPage;
+export default RatingPage;

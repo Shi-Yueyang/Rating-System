@@ -129,21 +129,21 @@ class AuthClient {
     console.log("[getUser] found token")
 
     return axios
-    .get('http://127.0.0.1:8000/rate/users/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((response) => {
-      console.log('[getUser] me endpoint response: ', JSON.stringify(response.data, null, 2));
-      const user = response.data as User;
-      console.log('[getUser] returned User object:', user);
-      return { data: user, error: undefined };
-    })
-    .catch((error) => {
-      // Handle the error and return an appropriate message
-      return { data: null, error: error.response?.data?.message || 'An error occurred' };
-    });
+      .get('http://127.0.0.1:8000/rate/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        console.log('[getUser] me endpoint response: ', JSON.stringify(response.data, null, 2));
+        const user = response.data as User;
+        console.log('[getUser] returned User object:', user);
+        return { data: user, error: undefined };
+      })
+      .catch((error) => {
+        // Handle the error and return an appropriate message
+        return { data: null, error: error.response?.data?.message || 'An error occurred' };
+      });
   }
 
   async signOut(): Promise<{ error?: string }> {
