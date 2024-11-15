@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
 from core.permissions import IsAdminOrOrganizer
-from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer, UserResourceSerializer, UserResourceReadSerializer
+from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -19,7 +19,6 @@ class EventViewSet(viewsets.ModelViewSet):
         user_id = self.request.query_params.get('user_id')
         if user_id:
             try:
-                user = User.objects.get(pk=user_id)
                 queryset = queryset.filter(resources__user_scores__user_id=user_id)
             except User.DoesNotExist:
                 raise NotFound(detail='User not found')    
@@ -78,10 +77,15 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve','me']:
+            return UserReadSerializer
+        return UserSerializer
+    
     def get_permissions(self):
         if self.action == 'create':
             return [AllowAny()]
-        elif self.action in ['update','partial_update']:
+        elif self.action in ['update','partial_update','me']:
             return [IsAuthenticated()]
         elif self.action == 'retrieve' and self.kwargs.get('pk') != str(self.request.user.id):
             return [IsAdminUser()]
