@@ -19,7 +19,7 @@ class EventViewSet(viewsets.ModelViewSet):
         user_id = self.request.query_params.get('user_id')
         if user_id:
             try:
-                queryset = queryset.filter(resources__user_scores__user_id=user_id)
+                queryset = queryset.filter(resources__user_resource__user_id=user_id)
             except User.DoesNotExist:
                 raise NotFound(detail='User not found')    
         return queryset.distinct()

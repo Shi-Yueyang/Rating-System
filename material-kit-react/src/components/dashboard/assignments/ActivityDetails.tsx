@@ -29,8 +29,6 @@ interface UserResource {
   resource: number;
 }
 
-
-
 const ActivityDetails = () => {
   // hooks
   const router = useRouter();

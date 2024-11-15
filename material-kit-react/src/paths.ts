@@ -4,9 +4,11 @@ export const paths = {
   dashboard: {
     account: '/dashboard/account',
     customers: '/dashboard/customers',
-    activity: '/dashboard/assignment', // newly added
+    activity: '/dashboard/assignment', 
+    rating: '/dashboard/rating',
   },
   createEvent:'/dashboard/assignment/create',
   eventDetails:'/dashboard/assignment/details/',
+  ratingDetails:'/dashboard/rating/details/',
   errors: { notFound: '/errors/not-found' },
 } as const;

@@ -7,18 +7,17 @@ import { paths } from '@/paths';
 
 interface Props {
   activity: Activity;
+  onClick:()=>void;
 }
 
-const ActivityCard = ({ activity }: Props) => {
+const ActivityCard = ({ activity,onClick }: Props) => {
   const router = useRouter();
-  const handleCardClick = () => {
-    router.push(paths.eventDetails+activity.id);
-  };
+
 
   return (
     <Card
       sx={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }} // Add cursor to indicate it's clickable
-      onClick={handleCardClick} // Make the card clickable
+      onClick={onClick} // Make the card clickable
     >
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
