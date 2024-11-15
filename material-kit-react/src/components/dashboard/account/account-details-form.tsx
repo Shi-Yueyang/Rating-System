@@ -40,6 +40,7 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
     endPoint: 'http://127.0.0.1:8000/rate/users/'+user?.id+'/',
     queryKey: ['users', String(user?.id)],
     accessToken,
+    contentType: 'multipart/form-data',
   })
   const {mutate:mutateUsers,isPending,isError,error} = useMutateUser('PATCH');
 
@@ -122,8 +123,6 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
                 />
               </FormControl>
             </Grid>
-            
-
             
           </Grid>
         </CardContent>
