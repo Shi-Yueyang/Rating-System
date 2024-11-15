@@ -23,6 +23,20 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+class UserReadSerializer(serializers.ModelSerializer):
+    is_staff = serializers.BooleanField()
+    groups = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'realname', 'email', 'avatar', 'is_staff', 'groups']
+
+    def get_groups(self, obj):
+        return obj.groups.values_list('name', flat=True)
+
+
+
+
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
