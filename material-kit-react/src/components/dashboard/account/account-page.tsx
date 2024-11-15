@@ -13,7 +13,7 @@ const AccountPage = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      setAvatarFile(event.target.files[0]);
+      setAvatarFile(file);
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
     }

@@ -30,8 +30,10 @@ async function fetchSingleData<T>(endPoint:string,headers:Record<string, string>
 
 
 async function mutateData<T>(endPoint:string, data:T|FormData,config:AxiosRequestConfig):Promise<T>{
-  console.log('method',config.method);
-  if (config.method === 'POST') {
+  if (config.method === 'PUT') {
+    const response = await axios.put(endPoint, data, config);
+    return response.data;
+  } else if (config.method === 'POST') {
     const response = await axios.post(endPoint, data, config);
     return response.data;
   } else if (config.method === 'PATCH') {
