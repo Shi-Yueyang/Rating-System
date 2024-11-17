@@ -26,16 +26,15 @@ const RatingPage = () => {
 
   return (
     <Stack spacing={3}>
-      {/* old activities */}
       <Grid container spacing={3}>
         {activities?.map((activity) => (
           <Grid key={activity.id} lg={4} md={6} xs={12}>
             <ActivityCard
               activity={activity}
               onClick={() => {
-                router.push(paths.ratingDetails + activity.id);
+                router.push(paths.ratingTasks + activity.id);
               }}
-            ></ActivityCard>
+            />
           </Grid>
         ))}
       </Grid>
