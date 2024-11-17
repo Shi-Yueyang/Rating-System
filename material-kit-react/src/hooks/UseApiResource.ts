@@ -8,6 +8,7 @@ export interface Activity {
   }
   
 export interface Aspect{
+    id:number
     name:string;
     description:string;
     percentage:number;
@@ -23,8 +24,8 @@ async function fetchData<T>(endPoint:string, headers:Record<string, string>, par
     return response.data;
 }
 
-async function fetchSingleData<T>(endPoint:string,headers:Record<string, string>):Promise<T>{
-  const response = await axios.get(endPoint,{headers});
+async function fetchSingleData<T>(endPoint:string,headers:Record<string, string>, params?: Record<string,any>):Promise<T>{
+  const response = await axios.get(endPoint,{headers,params});
   return response.data;
 }
 
@@ -51,7 +52,7 @@ interface Props{
     contentType?: 'application/json' | 'multipart/form-data';
 }
 
-export function UseApiResources<T>({endPoint,accessToken,queryKey,contentType='application/json'}:Props){
+export function UseApiResources<T>({endPoint,accessToken,queryKey=[] ,contentType='application/json'}:Props){
     const headers: Record<string, string> = {
         'Content-Type': contentType,
       };
@@ -59,10 +60,10 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey,contentType='a
         headers.Authorization = `Bearer ${accessToken}`;
       }
 
-      const useFetchSingleResource = () =>{
+      const useFetchSingleResource = (params?: Record<string, any>) =>{
         return useQuery<T,Error>({
             queryKey,
-            queryFn: ()=>fetchSingleData<T>(endPoint,headers),
+            queryFn: ()=>fetchSingleData<T>(endPoint,headers,params),
             staleTime: 5*60*1000
         })
       }

@@ -24,7 +24,6 @@ const ActivityPage = () => {
 
   return (
     <Stack spacing={3}>
-      {/* old activities */}
       <Grid container spacing={3}>
         {activities?.map((activity) => (
           <Grid key={activity.id} lg={4} md={6} xs={12}>

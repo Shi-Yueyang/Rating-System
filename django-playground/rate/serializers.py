@@ -35,8 +35,6 @@ class UserReadSerializer(serializers.ModelSerializer):
         return obj.groups.values_list('name', flat=True)
 
 
-
-
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
@@ -63,6 +61,12 @@ class EventSerializer(serializers.ModelSerializer):
         return event
 
 class UserResourceReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserResource
+        fields = ['id', 'user','resource','score']
+
+class UserResourceComplexReadSerializer(serializers.ModelSerializer):
+    resource = ResourceSerializer()
     class Meta:
         model = UserResource
         fields = ['id', 'user','resource','score']

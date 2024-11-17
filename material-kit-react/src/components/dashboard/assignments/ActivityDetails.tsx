@@ -12,7 +12,7 @@ import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
 import { paths } from '@/paths';
 
-interface Resource {
+export interface Resource {
   id: number;
   resource_file: string;
   event:number;
@@ -27,6 +27,7 @@ interface UserResource {
   id: number;
   user: number;
   resource: number;
+  score: number;
 }
 
 const ActivityDetails = () => {
@@ -37,7 +38,7 @@ const ActivityDetails = () => {
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
     endPoint: 'http://127.0.0.1:8000/rate/users/',
-    queryKey: ['users'],
+    queryKey: ['ActivityDetails_users'],
     accessToken,
   });
 
@@ -48,8 +49,8 @@ const ActivityDetails = () => {
   });
   const {useMutateResources:useMutateUserResources } = UseApiResources<UserResource>({
     endPoint: 'http://127.0.0.1:8000/rate/user-resource/bulk_create/',
-    queryKey: ['userscore'],
     accessToken,
+    queryKey: ['userscore'],
     contentType: 'multipart/form-data'
   });
   const {mutate:mutateUserResources} = useMutateUserResources('POST');
