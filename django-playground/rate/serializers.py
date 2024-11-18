@@ -34,11 +34,12 @@ class UserReadSerializer(serializers.ModelSerializer):
     def get_groups(self, obj):
         return obj.groups.values_list('name', flat=True)
 
-
 class ResourceSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Resource
         fields = ['id', 'resource_file','event']
+ 
 
 class AspectSerializer(serializers.ModelSerializer):
     event = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all(),required=False)
