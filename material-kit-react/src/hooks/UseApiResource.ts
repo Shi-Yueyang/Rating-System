@@ -30,7 +30,7 @@ async function fetchSingleData<T>(endPoint:string,headers:Record<string, string>
 }
 
 
-async function mutateData<T>(endPoint:string, data:T|FormData,config:AxiosRequestConfig):Promise<T>{
+async function mutateData(endPoint:string, data:any,config:AxiosRequestConfig):Promise<any>{
   if (config.method === 'PUT') {
     const response = await axios.put(endPoint, data, config);
     return response.data;
@@ -78,7 +78,7 @@ export function UseApiResources<T>({endPoint,accessToken,queryKey=[] ,contentTyp
 
       const useMutateResources = (method:'POST'|'PATCH'|'PUT') =>{
         return useMutation({
-            mutationFn:(data:T|FormData)=>mutateData<T>(endPoint,data,{method,headers}),
+            mutationFn:(data:any)=>mutateData(endPoint,data,{method,headers}),
             onError:(error:AxiosError)=>{
                 console.error("[useApiResource onError]:", error.response?.data);
                 throw error;

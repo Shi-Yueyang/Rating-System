@@ -77,7 +77,7 @@ class UserResourceSerializer(serializers.ModelSerializer):
     event = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all(),required=False)
     class Meta:
         model = UserResource
-        fields = ['id', 'user','resource','resource_file','event']
+        fields = ['id', 'user','resource','resource_file','event','score']
 
     @transaction.atomic
     def create(self, validated_data):

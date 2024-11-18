@@ -1,16 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, Grid, InputLabel, TextField, Typography } from '@mui/material';
-import {  useRouter } from 'next/navigation';
+import { Form } from 'react-hook-form';
+
 import { useUser } from '@/hooks/use-user';
 import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
 interface UserResource {
-  id:number;
+  id: number;
   user: number;
   resource: number;
+  score: number;
+}
+
+interface RatingScore {
+  aspectId: number;
   score: number;
 }
 
@@ -22,39 +28,56 @@ const RatingDetails = () => {
     accessToken,
   });
   const { event_id, userResource_id } = useParams();
-  
-  const { useFetchSingleResource: useFetchUserResource } = UseApiResources<UserResource>({
-    endPoint: 'http://127.0.0.1:8000/rate/user-resource/'+userResource_id,
+
+  const { useMutateResources: useMutateUserResource } = UseApiResources<UserResource>({
+    endPoint: 'http://127.0.0.1:8000/rate/user-resource/' + userResource_id + '/',
     queryKey: ['userscoreupload'],
     accessToken,
   });
-  
+  const { mutate: mutateUserResources } = useMutateUserResource('PATCH');
   const { user } = useUser();
-  const [score, setScore] = useState(0);
   const { data: aspects } = fetchAspects({ event_id: event_id });
-  
-  const { data: userResources } = useFetchUserResource({ user_id: user?.id, id: userResource_id });
-  console.log(userResources);
+  const [ratingScore, setRatingScore] = useState<RatingScore[]>([]);
+  useEffect(() => {
+    if (aspects) {
+      setRatingScore(aspects.map((aspect) => ({ aspectId: aspect.id, score: 0 })));
+    }
+  }, [aspects]);
+
+  const handleInputChange = (index: number, value: number) => {
+    setRatingScore((prev) => {
+      const newRatingScore = [...prev];
+      newRatingScore[index].score = value;
+      return newRatingScore;
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // mutateUserResources({ event: event_id, score });
+    e.preventDefault();
+    const score = ratingScore.reduce((acc, curr) => acc + curr.score, 0);
+    mutateUserResources({ score });
   };
   return (
     <form onSubmit={handleSubmit}>
-        <Grid item md={6} xs={12} >
-          <Card>
-            <CardContent>
-              <Grid container spacing={3}>
-                {aspects?.map((aspect, index) => (
-                  <Grid item md={6} xs={12} key={index}>
-                    <InputLabel>{aspect.name}</InputLabel>
-                    <TextField type="number" inputProps={{ min: 0, max: aspect.percentage }} fullWidth />
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent>
-          </Card>
-        </Grid>
+      <Grid item md={6} xs={12}>
+        <Card>
+          <CardContent>
+            <Grid container spacing={3}>
+              {aspects?.map((aspect, index) => (
+                <Grid item md={6} xs={12} key={index}>
+                  <InputLabel>{aspect.name}</InputLabel>
+                  <TextField
+                    type="number"
+                    inputProps={{ min: 0, max: aspect.percentage,step:0.1 }}
+                    fullWidth
+                    onChange={(e) => handleInputChange(index, Number(e.target.value))}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
       <Button type="submit" variant="outlined" color="primary" style={{ marginTop: '16px' }}>
         提交
       </Button>
