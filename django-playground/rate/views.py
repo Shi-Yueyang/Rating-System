@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
 from core.permissions import IsAdminOrOrganizer
-from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserResourceComplexReadSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer
+from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -138,11 +138,6 @@ class UserResourceViewSet(viewsets.ModelViewSet):
                 raise NotFound(detail="No UserScores found for the given resource ID.")
         return queryset
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def complex_list(self, request):
-        queryset = self.get_queryset()
-        serializer = UserResourceComplexReadSerializer(queryset, many=True)
-        return Response(serializer.data)
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     @transaction.atomic

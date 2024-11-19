@@ -35,11 +35,10 @@ class UserReadSerializer(serializers.ModelSerializer):
         return obj.groups.values_list('name', flat=True)
 
 class ResourceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Resource
         fields = ['id', 'resource_file','event']
- 
+        
 
 class AspectSerializer(serializers.ModelSerializer):
     event = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all(),required=False)
@@ -62,15 +61,11 @@ class EventSerializer(serializers.ModelSerializer):
         return event
 
 class UserResourceReadSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserResource
-        fields = ['id', 'user','resource','score']
-
-class UserResourceComplexReadSerializer(serializers.ModelSerializer):
     resource = ResourceSerializer()
     class Meta:
         model = UserResource
         fields = ['id', 'user','resource','score']
+
 
 class UserResourceSerializer(serializers.ModelSerializer):
     resource = serializers.PrimaryKeyRelatedField(queryset=Resource.objects.all(),required=False)
