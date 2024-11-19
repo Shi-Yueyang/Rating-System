@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Event, Resource, Aspect, User, UserResource
+from .models import Event, Resource, Aspect, User, UserResource, UserResourceAspectScore
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
@@ -93,3 +93,10 @@ class UserResourceSerializer(serializers.ModelSerializer):
                 setattr(resource,attr,value)
             resource.save()
         return super().update(instance, validated_data)
+
+class UserResourceAspectScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserResourceAspectScore
+        fields = ['id', 'user_resource','aspect','score']
+    
+    

@@ -25,3 +25,9 @@ class UserResource(models.Model):
     resource = models.ForeignKey('Resource', on_delete=models.CASCADE, related_name='user_resource')
     score = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0),MaxValueValidator(100)], null=True)
 
+class UserResourceAspectScore(models.Model):
+    class Meta:
+        unique_together = ('user_resource', 'aspect')
+    user_resource = models.ForeignKey(UserResource, on_delete=models.CASCADE, related_name='user_scores')
+    aspect = models.ForeignKey(Aspect, on_delete=models.CASCADE, related_name='user_scores')
+    score = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0),MaxValueValidator(100)], null=True)
