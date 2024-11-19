@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, Grid, InputLabel, TextField, Typography } from '@mui/material';
-import { Form } from 'react-hook-form';
-
+import { baseURL } from '@/config';
 import { useUser } from '@/hooks/use-user';
 import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
@@ -23,14 +22,14 @@ interface RatingScore {
 const RatingDetails = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
-    endPoint: 'http://127.0.0.1:8000/rate/aspects/',
+    endPoint: `${baseURL}/rate/aspects/`,
     queryKey: ['aspects'],
     accessToken,
   });
   const { event_id, userResource_id } = useParams();
 
   const { useMutateResources: useMutateUserResource } = UseApiResources<UserResource>({
-    endPoint: 'http://127.0.0.1:8000/rate/user-resource/' + userResource_id + '/',
+    endPoint: `${baseURL}/rate/user-resource/${userResource_id}/`,
     queryKey: ['userscoreupload'],
     accessToken,
   });

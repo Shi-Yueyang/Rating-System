@@ -14,7 +14,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import Grid from '@mui/material/Unstable_Grid2';
 
 import { useUser } from '@/hooks/use-user';
-import useUploadUser from '@/hooks/UseUpload';
+import { baseURL } from '@/config';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,7 +37,7 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
   const { user } = useUser();
   const accessToken = localStorage.getItem('custom-auth-token');
   const{useMutateResources:useMutateUser} = UseApiResources<User>({
-    endPoint: 'http://127.0.0.1:8000/rate/users/'+user?.id+'/',
+    endPoint: `${baseURL}/users/${user?.id}/`,
     queryKey: ['users', String(user?.id)],
     accessToken,
     contentType: 'multipart/form-data',

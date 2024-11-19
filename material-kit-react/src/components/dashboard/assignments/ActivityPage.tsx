@@ -8,11 +8,12 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { paths } from '@/paths';
 import { Activity, UseApiResources } from '@/hooks/UseApiResource';
 import ActivityCard from '@/components/dashboard/assignments/ActivityCard';
+import { baseURL } from '@/config';
 
 const ActivityPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: useActivities } = UseApiResources<Activity>({
-    endPoint: 'http://127.0.0.1:8000/rate/events/',
+    endPoint: `${baseURL}/rate/events/`,
     accessToken,
     queryKey: ['activity'],
   });

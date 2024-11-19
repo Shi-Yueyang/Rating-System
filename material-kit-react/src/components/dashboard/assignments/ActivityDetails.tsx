@@ -11,6 +11,8 @@ import { UseApiResources } from '@/hooks/UseApiResource';
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
 import { paths } from '@/paths';
+import { useQueryClient } from '@tanstack/react-query';
+import { baseURL } from '@/config';
 
 export interface Resource {
   id: number;
@@ -26,7 +28,7 @@ interface AssignmentFile {
 interface UserResource {
   id: number;
   user: number;
-  resource: number;
+  resource: Resource;
   score: number;
 }
 
@@ -34,30 +36,32 @@ const ActivityDetails = () => {
   // hooks
   const router = useRouter();
   const { id: event_id } = useParams();
+  const queryClient = useQueryClient();
+
   const accessToken = localStorage.getItem('custom-auth-token');
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
-    endPoint: 'http://127.0.0.1:8000/rate/users/',
-    queryKey: ['ActivityDetails_users'],
+    endPoint: `${baseURL}/rate/users/`,
+    queryKey: ['ActivityDetails-users'],
     accessToken,
   });
 
   const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
-    endPoint: 'http://127.0.0.1:8000/rate/user-resource/',
-    queryKey: ['userscore'],
+    endPoint: `${baseURL}/rate/user-resource/`,
+    queryKey: ['ActivityDetails-user_resource'],
     accessToken,
   });
   const {useMutateResources:useMutateUserResources } = UseApiResources<UserResource>({
-    endPoint: 'http://127.0.0.1:8000/rate/user-resource/bulk_create/',
+    endPoint: `${baseURL}/rate/user-resource/bulk_create/`,
     accessToken,
-    queryKey: ['userscore'],
+    queryKey: ['ActivityDetails-bulk_create'],
     contentType: 'multipart/form-data'
   });
   const {mutate:mutateUserResources} = useMutateUserResources('POST');
 
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
-    endPoint: 'http://127.0.0.1:8000/rate/resources/',
-    queryKey: ['resources'],
+    endPoint: `${baseURL}/rate/resources/`,
+    queryKey: ['ActivityDetails-resources'],
     accessToken,
   });
   
@@ -79,7 +83,7 @@ const ActivityDetails = () => {
 
     if (userResources && users) {
       userResources.forEach((userResource) => {
-        const resourceId = userResource.resource;
+        const resourceId = userResource.resource.id;
         const foundUser = users.find((user) => user.id === userResource.user);
         if (foundUser && assignmentMap[resourceId]) {
           assignmentMap[resourceId].users.push(foundUser);
@@ -136,6 +140,7 @@ const ActivityDetails = () => {
 
     mutateUserResources(formData, {
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['ActivityDetails-user_resource'] });
         router.push(paths.dashboard.activity);
       },
 

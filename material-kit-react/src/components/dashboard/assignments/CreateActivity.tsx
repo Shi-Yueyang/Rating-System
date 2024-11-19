@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
-
+import { baseURL } from '@/config';
 import { paths } from '@/paths';
 import { ActivityWithAspect, Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
@@ -55,7 +55,7 @@ const CreateActivity = () => {
   const router = useRouter();
 
   const { useMutateResources: useMutateActivityWithAspect } = UseApiResources<ActivityWithAspect>({
-    endPoint: 'http://127.0.0.1:8000/rate/events/',
+    endPoint: `${baseURL}/rate/event`,
     queryKey: ['events'],
     accessToken: accessToken,
   });
@@ -63,7 +63,7 @@ const CreateActivity = () => {
 
   // Form submission handler
   const onSubmit = (data: FormData) => {
-    const aspects: Aspect[] = data.criteria.map((criterion) => ({ ...criterion }));
+    const aspects: Aspect[] = data.criteria.map((criterion) => ({ ...criterion } as Aspect));
     const activityWithAspect:ActivityWithAspect = {name: data.eventName, dueDate: data.duedate ,aspects};
 
 

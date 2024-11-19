@@ -10,13 +10,14 @@ import { useUser } from '@/hooks/use-user';
 import { Activity, UseApiResources } from '@/hooks/UseApiResource';
 
 import ActivityCard from '../assignments/ActivityCard';
+import { baseURL } from '@/config';
 
 const RatingPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
   const { user } = useUser();
 
   const { useFetchResources: useActivities } = UseApiResources<Activity>({
-    endPoint: 'http://127.0.0.1:8000/rate/events/',
+    endPoint: `${baseURL}/rate/events/`,
     accessToken,
     queryKey: ['activityuser'],
   });
