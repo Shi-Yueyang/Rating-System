@@ -18,8 +18,8 @@ import {
 import { paths } from '@/paths';
 import { useUser } from '@/hooks/use-user';
 import { UseApiResources } from '@/hooks/UseApiResource';
-
 import { Resource } from '../assignments/ActivityDetails';
+import { baseURL } from '@/config';
 
 interface UserResourceFull {
   id: number;
@@ -32,12 +32,12 @@ const RatingTaskList = () => {
   const { user } = useUser();
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: useFetchUserResources } = UseApiResources<UserResourceFull>({
-    endPoint: 'http://127.0.0.1:8000/rate/user-resource/complex_list/',
+    endPoint:`${baseURL}/rate/user-resource/`,
     queryKey: ['userscoreupload'],
     accessToken,
   });
   const { data: userResources } = useFetchUserResources({ event_id: event_id, user_id: user?.id });
-  console.log(userResources)
+  console.log(userResources);
   const router = useRouter();
   return (
     <Stack>
@@ -54,33 +54,33 @@ const RatingTaskList = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Array.isArray(userResources) && userResources.map((userResource) => (
-              <TableRow key={userResource.id}>
-                <TableCell>作品名</TableCell>
-
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => {
-                      router.push(paths.ratingTasks + event_id + '/' + userResource.id);
-                    }}
-                  >
-                    点评
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    href={userResource.resource.resource_file}
-                    download
-                    style={{ marginLeft: '10px' }}
-                  >
-                    下载
-                  </Button>
-                </TableCell>
-                <TableCell>{userResource.score}</TableCell>
-              </TableRow>
-            ))}
+            {Array.isArray(userResources) &&
+              userResources.map((userResource) => (
+                <TableRow key={userResource.id}>
+                  <TableCell>作品名</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => {
+                        router.push(paths.ratingTasks + event_id + '/' + userResource.id);
+                      }}
+                    >
+                      点评
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      href={`${baseURL}/${userResource.resource.resource_file}/`} 
+                      download
+                      style={{ marginLeft: '10px' }}
+                    >
+                      下载
+                    </Button>
+                  </TableCell>
+                  <TableCell>{userResource.score}</TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
