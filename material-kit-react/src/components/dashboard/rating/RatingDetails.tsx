@@ -34,7 +34,6 @@ const RatingDetails = () => {
     accessToken,
   });
   const { mutate: mutateUserResources } = useMutateUserResource('PATCH');
-  const { user } = useUser();
   const { data: aspects } = fetchAspects({ event_id: event_id });
   const [ratingScore, setRatingScore] = useState<RatingScore[]>([]);
   useEffect(() => {
@@ -54,6 +53,10 @@ const RatingDetails = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const score = ratingScore.reduce((acc, curr) => acc + curr.score, 0);
+    const userResourceAspectScore = ratingScore.map((rating) => ({
+      aspect: rating.aspectId,
+      score: rating.score,
+    }));
     mutateUserResources({ score });
   };
   return (

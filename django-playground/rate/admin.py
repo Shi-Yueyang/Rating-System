@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Event,Aspect
-from .models import Resource, UserResource
+from .models import Resource, UserResource, UserResourceAspectScore
 
 class EventAdmin(admin.ModelAdmin):
     list_display = ('name', 'dueDate')
@@ -26,7 +26,14 @@ class UserResourceAdmin(admin.ModelAdmin):
     list_filter = ('score',)
     ordering = ('-score',)
 
+class UserResourceAspectScoreAdmin(admin.ModelAdmin):
+    list_display = ('user_resource', 'aspect', 'score')
+    search_fields = ('user_resource__user__username', 'aspect__name')
+    list_filter = ('score',)
+    ordering = ('-score',)
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(UserResource, UserResourceAdmin)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Aspect, AspectAdmin)
+admin.site.register(UserResourceAspectScore, UserResourceAspectScoreAdmin)

@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework import status
-from .models import Event, Resource, Aspect, User, UserResource
+from .models import Event, Resource, Aspect, User, UserResource, UserResourceAspectScore
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
 from core.permissions import IsAdminOrOrganizer
-from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer
+from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer, UserResourceAspectScoreSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -59,6 +59,11 @@ class ResourceViewSet(viewsets.ModelViewSet):
         resource = self.get_object()
         serializer = self.get_serializer(resource)
         return Response(serializer.data)
+    
+    @transaction.atomic
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def rate_resource(self,request):
+        print(request.data)
 
 class AspectViewSet(viewsets.ModelViewSet):
     queryset = Aspect.objects.all()
@@ -72,7 +77,7 @@ class AspectViewSet(viewsets.ModelViewSet):
                 raise NotFound(detail="No Aspects found for the given event ID.")
             return queryset
         return super().get_queryset()
-    
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -186,3 +191,26 @@ class UserResourceViewSet(viewsets.ModelViewSet):
                 user_resource.save()
                 created_resources.append(user_resource)
         return Response( status=status.HTTP_201_CREATED)
+    
+class UserResourceAspectScoreViewSet(viewsets.ModelViewSet):
+    serializer_class = UserResourceAspectScoreSerializer
+
+    def get_queryset(self):
+        queryset = UserResourceAspectScore.objects.all()
+        user_id = self.request.query_params.get('user_id')
+        resource_id = self.request.query_params.get('resource_id')
+        aspect_id = self.request.query_params.get('aspect_id')
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+            if not queryset.exists():
+                raise NotFound(detail="No UserScores found for the given user ID.")
+        if resource_id:
+            queryset = queryset.filter(resource_id=resource_id)
+            if not queryset.exists():
+                raise NotFound(detail="No UserScores found for the given resource ID.")
+        if aspect_id:
+            queryset = queryset.filter(aspect_id=aspect_id)
+            if not queryset.exists():
+                raise NotFound(detail="No UserScores found for the given aspect ID.")
+        return queryset
+
