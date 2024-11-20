@@ -4,10 +4,11 @@ import { Stack } from '@mui/system';
 import React, { useState } from 'react';
 
 interface Props{
-    aspects:Aspect[]
+    aspects:Aspect[];
+    handleAspectChange: (index: number, field: keyof Aspect, value: any) => void;
 }
 
-const EditAspectCard = ({aspects}:Props) => {
+const EditAspectCard = ({aspects,handleAspectChange}:Props) => {
 const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -33,7 +34,7 @@ const [isEditing, setIsEditing] = useState(false);
             <Grid item xs={12} key={index}>
               <Stack spacing={2}>
                 <Typography variant="h6" color="secondary">
-                  {`标准 ${index + 1}`}
+                  {`No ${index + 1}`}
                 </Typography>
                 {isEditing ? (
                   <>
@@ -44,6 +45,7 @@ const [isEditing, setIsEditing] = useState(false);
                       value={aspect.name}
                       variant="outlined"
                       size="small"
+                      onChange={(e) => handleAspectChange(index, 'name', e.target.value)}
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
                     <TextField
@@ -53,6 +55,7 @@ const [isEditing, setIsEditing] = useState(false);
                       value={aspect.percentage}
                       variant="outlined"
                       size="small"
+                      onChange={(e) => handleAspectChange(index, 'percentage', e.target.value)}
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
                     <TextField
@@ -60,6 +63,7 @@ const [isEditing, setIsEditing] = useState(false);
                       type="text"
                       fullWidth
                       value={aspect.description}
+                      onChange={(e) => handleAspectChange(index, 'description', e.target.value)}
                       variant="outlined"
                       size="small"
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
@@ -89,7 +93,7 @@ const [isEditing, setIsEditing] = useState(false);
       <Divider />
       <CardActions sx={{ justifyContent: 'flex-end', paddingX: 2 }}>
         <Button onClick={() => setIsEditing(true)} disabled={isEditing} variant="contained" color="primary">
-          激活编辑
+          编辑
         </Button>
         <Button
           onClick={() => setIsEditing(false)}
@@ -98,7 +102,7 @@ const [isEditing, setIsEditing] = useState(false);
           color="error"
           sx={{ marginLeft: 2 }}
         >
-          取消编辑
+          取消
         </Button>
       </CardActions>
     </Card>

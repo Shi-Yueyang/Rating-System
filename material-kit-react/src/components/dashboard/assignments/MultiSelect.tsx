@@ -13,8 +13,9 @@ interface Props{
 export default function MultiSelect({users,selectedUsers,onChange}:Props) {
   return (
     <Autocomplete
-      sx={{ m: 1, width: 500 }}
+      // sx={{ m: 1, width: 500 }}
       multiple
+      fullWidth
       options={users}
       value={selectedUsers}
       getOptionLabel={(option) => option.username||' '}

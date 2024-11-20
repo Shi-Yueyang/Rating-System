@@ -9,7 +9,7 @@ class Event(models.Model):
 
 class Resource(models.Model):
     resource_file = models.FileField(upload_to='resources/')
-    resource_name = models.CharField(max_length=255)
+    resource_name = models.CharField(max_length=255,unique=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, null=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='resources')
 
