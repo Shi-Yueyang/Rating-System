@@ -55,7 +55,7 @@ const CreateActivity = () => {
   const router = useRouter();
 
   const { useMutateResources: useMutateActivityWithAspect } = UseApiResources<ActivityWithAspect>({
-    endPoint: `${baseURL}/rate/event`,
+    endPoint: `${baseURL}/rate/events/`,
     queryKey: ['events'],
     accessToken: accessToken,
   });
@@ -89,7 +89,7 @@ const CreateActivity = () => {
   };
 
   return (
-    <Stack spacing={3} sx={{ maxWidth: '600px', margin: 'auto', padding: 3 }}>
+    <Stack spacing={3} sx={{ maxWidth: '800px', margin: 'auto', padding: 3 }}>
       <Typography variant="h4">新建活动</Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
@@ -132,7 +132,7 @@ const CreateActivity = () => {
             {fields.map((field, index) => (
               <Box key={field.id} sx={{ border: '1px solid #ddd', padding: 2 }}>
                 <Grid container spacing={2}>
-                  <Grid item xs={3}>
+                  <Grid item xs={12}>
                     <TextField
                       label="名称"
                       {...register(`criteria.${index}.name`)}
@@ -142,19 +142,20 @@ const CreateActivity = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={8}>
+                  <Grid item xs={12}>
                     <TextField
                       label="描述"
                       {...register(`criteria.${index}.description`)}
                       error={!!errors.criteria?.[index]?.description}
                       helperText={errors.criteria?.[index]?.description?.message}
                       fullWidth
+                      multiline
                     />
                   </Grid>
 
-                  <Grid item xs={3}>
+                  <Grid item xs={12}>
                     <TextField
-                      label="百分比"
+                      label="分值"
                       type="number"
                       {...register(`criteria.${index}.percentage`, { valueAsNumber: true })}
                       error={!!errors.criteria?.[index]?.percentage}
@@ -163,7 +164,7 @@ const CreateActivity = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={1}>
+                  <Grid item xs={12} container justifyContent={'center'}>
                     <Button onClick={() => remove(index)}>删除</Button>
                   </Grid>
                 </Grid>

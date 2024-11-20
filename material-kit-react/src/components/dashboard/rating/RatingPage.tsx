@@ -35,7 +35,7 @@ const RatingPage = () => {
               onClick={() => {
                 router.push(paths.ratingTasks + activity.id);
               }}
-            />
+            ></ActivityCard>
           </Grid>
         ))}
       </Grid>
