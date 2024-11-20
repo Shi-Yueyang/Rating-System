@@ -49,15 +49,16 @@ const RatingTaskList = () => {
           <TableHead>
             <TableRow>
               <TableCell>作品名</TableCell>
-              <TableCell>操作</TableCell>
               <TableCell>分数</TableCell>
+              <TableCell>操作</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {Array.isArray(userResources) &&
               userResources.map((userResource) => (
                 <TableRow key={userResource.id}>
-                  <TableCell>作品名</TableCell>
+                  <TableCell>{userResource.resource.resource_name}</TableCell>
+                  <TableCell>{userResource.score}</TableCell>
                   <TableCell>
                     <Button
                       variant="outlined"
@@ -78,7 +79,7 @@ const RatingTaskList = () => {
                       下载
                     </Button>
                   </TableCell>
-                  <TableCell>{userResource.score}</TableCell>
+
                 </TableRow>
               ))}
           </TableBody>
