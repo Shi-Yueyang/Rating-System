@@ -7,6 +7,7 @@ import { baseURL } from '@/config';
 import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 import { paths } from '@/paths';
 import { useQueryClient } from '@tanstack/react-query';
+import { set } from 'react-hook-form';
 
 interface UserResource {
   id: number;
@@ -38,14 +39,17 @@ const RatingDetails = () => {
   });
 
   const { mutate: mutateUserResources } = useMutateUserResource('PATCH');
-  const { data: aspects } = fetchAspects({ event_id: event_id });
   const [ratingScore, setRatingScore] = useState<RatingScore[]>([]);
+  const {data:aspects} = fetchAspects({event_id:event_id});
+
   useEffect(() => {
     if (aspects) {
       setRatingScore(aspects.map((aspect) => ({ aspectId: aspect.id, score: 0 })));
     }
   }, [aspects]);
 
+
+  
   const handleInputChange = (index: number, value: number) => {
     setRatingScore((prev) => {
       const newRatingScore = [...prev];
