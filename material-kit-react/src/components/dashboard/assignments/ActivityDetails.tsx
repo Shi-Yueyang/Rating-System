@@ -26,16 +26,27 @@ import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 import EditAspectCard from './EditAspectCard';
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
+import { set } from 'react-hook-form';
 
 export interface Resource {
   id: number;
-  resource_name: string;
   resource_file: string;
+  resource_name: string;
   event: number;
 }
 
+interface NewResource{
+  resource_file:File;
+  resource_name:string;
+  event:number
+}
+
+const isNotResource = (resource: any): resource is NewResource => {
+  return (resource as Resource).id === undefined;
+}
+
 interface AssignmentFile {
-  file: File | Resource;
+  resource: NewResource | Resource;
   users: User[];
 }
 
@@ -89,14 +100,15 @@ const ActivityDetails = () => {
   // call hooks
   const { data: users } = fetchUsers();
   const { data: userResources } = fetchUserResource({ event_id: event_id });
-  const { data: aspects } = fetchAspects({ event_id: event_id });
+  const [aspects, setAspects] = useState<Aspect[]>();
+
   const { data: resources } = fetchResources({ event_id: event_id });
 
   const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
     resources?.forEach((resource) => {
       assignmentMap[resource.id] = {
-        file: resource,
+        resource: resource,
         users: [],
       };
     });
@@ -121,12 +133,29 @@ const ActivityDetails = () => {
     setAssignments(transformedAssignments);
   };
 
-  // without useEffect, it will cause infinite rerender
   useEffect(() => {
     initializeAssignments();
   }, [userResources, resources]);
 
+  const { data: aspectsData } = fetchAspects({ event_id: event_id });
+  useEffect(() => {
+    setAspects(aspectsData);
+  }, [event_id]);
+
   // callbacks
+  const handleAspectChange = (index: number, field: keyof Aspect, value: any) => {
+    if (aspects === undefined) return;
+    const newAspects = aspects.map((aspect, i) => {
+      if (i === index) {
+        return { ...aspect, [field]: value };
+      } else {
+        return aspect;
+      }
+    });
+
+    setAspects(newAspects);
+  };
+
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
     setAssignments((prev) => {
       const updatedAssignment = [...prev];
@@ -139,24 +168,46 @@ const ActivityDetails = () => {
     setAssignments((prevAssignments) => prevAssignments.filter((_, i) => i !== id));
   };
 
-  const handleFileChange = () => {
-    const userResourcePairs = assignments.flatMap((assignment) =>
-      assignment.users.map((user) => ({
-        user: user.id,
-        resource: assignment.file instanceof File ? assignment.file : (assignment.file as Resource).id,
-      }))
-    );
+  const handleFileNameChange = (index: number, value: string) => {
+    const newAssignments = assignments.map((assignment, i) => {
+      if (i === index) {
+        return {...assignment, resource: { ...assignment.resource, resource_name: value } };
+      }
+      return assignment
+    });
+    setAssignments(newAssignments);
+  }
+
+  const handleSubmit = () => {
     const formData = new FormData();
-    userResourcePairs.forEach((pair, index) => {
-      formData.append(`userResourcePairs_${index}_user`, pair.user.toString());
-      if (pair.resource instanceof File) {
-        formData.append(`userResourcePairs_${index}_resourcefile`, pair.resource);
-        formData.append(`userResourcePairs_${index}_event`, event_id.toString());
-      } else {
-        formData.append(`userResourcePairs_${index}_resource`, pair.resource.toString());
+    // upload and rename
+    assignments.forEach((assignment,id) => {
+      if (isNotResource(assignment.resource)) {
+        formData.append(`newResourcefile_${id}_resourceFile`, assignment.resource.resource_file);
+        formData.append(`newResourcefile_${id}_event`, event_id.toString());
+        formData.append(`newResourcefile_${id}_resourceName`, assignment.resource.resource_name);
+      }
+      else{
+        formData.append(`oldResourcefile_${id}_resource`, assignment.resource.id.toString());
+        formData.append(`oldResourcefile_${id}_resourceName`, assignment.resource.resource_name);
       }
     });
 
+
+    // upload userResourcePairs
+    const userResourcePairs = assignments.flatMap((assignment) =>
+      assignment.users.map((user) => ({
+        resourceName:assignment.resource.resource_name,
+        user: user.id,
+      }))
+    );
+
+    userResourcePairs.forEach((pair, index) => {
+      formData.append(`userResourcePairs_${index}_user`, pair.user.toString());
+      formData.append(`userResourcePairs_${index}_resourceName`, pair.resourceName.toString());
+    });
+
+    console.log('formData', formData);
     mutateUserResources(formData, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['ActivityDetails-user_resource'] });
@@ -170,7 +221,8 @@ const ActivityDetails = () => {
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
         const files = event.target.files;
-        const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ file, users: [] }));
+        const resource:NewResource = { resource_file: files[0], resource_name: "" ,event: parseInt(event_id as string)};
+        const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ resource, users: [] as User[] } ));
         setAssignments((prev) => [...prev, ...newAssignments]);
       }
     },
@@ -181,7 +233,7 @@ const ActivityDetails = () => {
 
   return (
     <>
-      <EditAspectCard aspects={aspects || []}></EditAspectCard>
+      <EditAspectCard aspects={aspects || []} handleAspectChange={handleAspectChange}></EditAspectCard>
       {/* First card: File upload section */}
       <Card
         sx={{
@@ -224,25 +276,38 @@ const ActivityDetails = () => {
           <Grid container direction="column" spacing={3}>
             {assignments.map((assignment, index) => (
               <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
-                <Grid item>
+                <Grid item xs={12}>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                    {assignment.file instanceof File
-                      ? assignment.file.name
-                      : (assignment.file as Resource).resource_name}
+                    {isNotResource(assignment.resource)
+                      ? assignment.resource.resource_file.name
+                      : (assignment.resource as Resource).resource_file.split('/').pop()}
                   </Typography>
                 </Grid>
-                
-                <Grid item>
+                <Grid item xs={12}>
+                  <TextField
+                    label="作品名"
+                    fullWidth
+                    onChange={(e) => handleFileNameChange(index, e.target.value)}
+                    value={assignment.resource.resource_name}
+                  />
+                </Grid>
+                <Grid item xs={12}>
                   <MultiSelect
                     users={users || []}
                     onChange={(selectedUsers) => handleUserChange(index, selectedUsers)}
                     selectedUsers={assignment.users}
                   />
                 </Grid>
-                <Grid item>
-                  <Button variant="outlined" color="error" onClick={() => handleFileDelete(index)}>
-                    删除
-                  </Button>
+                {
+                  isNotResource(assignment.resource) && 
+                  <Grid item xs={12}>
+                    <Button variant="outlined" color="error" onClick={() => handleFileDelete(index)}>
+                      删除
+                    </Button>
+                  </Grid>
+                }
+                <Grid item xs={12}>
+                  <Divider />
                 </Grid>
               </Grid>
             ))}
@@ -251,7 +316,7 @@ const ActivityDetails = () => {
       </Card>
 
       <Box display={'flex'} justifyContent={'center'} mt={3}>
-        <Button variant="contained" color="primary" onClick={handleFileChange}>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>
           提交
         </Button>
       </Box>
