@@ -144,6 +144,29 @@ class UserResourceViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+    @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
+    @transaction.atomic
+    def detail_update(self,request,pk=None):
+        try:
+            user_resource = UserResource.objects.get(pk=pk)
+        except UserResource.DoesNotExist:
+            raise NotFound(detail='UserResource not found')
+        
+        total_score = request.data.get('totalScore')
+        aspects_scores = request.data.get('userResourceAspectScore')
+        if total_score:
+            user_resource.score = total_score
+            user_resource.save()
+        
+        if aspects_scores:
+            for aspect_score in aspects_scores:
+                try:
+                    UserResourceAspectScore.objects.create(user_resource=user_resource, aspect_id=aspect_score['aspect'], score=aspect_score['score'])
+                except Exception as e:
+                    return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     @transaction.atomic
     def bulk_create(self, request):
@@ -161,7 +184,6 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             resource_id = pair.get('resource')
             resource_file = pair.get('resourcefile')
             event_id = pair.get('event')
-
             try:
                 user = User.objects.get(pk=user_id)
             except User.DoesNotExist:
@@ -179,7 +201,6 @@ class UserResourceViewSet(viewsets.ModelViewSet):
                     return Response({'error': f'Event with id {event_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
                 resource_serializer = ResourceSerializer(data={'resource_file': resource_file, 'event': event.id})
-                
                 try:
                     resource_serializer.is_valid(raise_exception=True)
                     resource = resource_serializer.save()
