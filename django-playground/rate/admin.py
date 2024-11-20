@@ -15,7 +15,7 @@ class AspectAdmin(admin.ModelAdmin):
     ordering = ('event', 'name')
 
 class ResourceAdmin(admin.ModelAdmin):
-    list_display = ('resource_file', 'uploaded_at', 'event')
+    list_display = ('resource_name','resource_file', 'uploaded_at', 'event')
     search_fields = ('resource_file', 'event__name')
     list_filter = ('event', 'uploaded_at')
     ordering = ('-uploaded_at',)

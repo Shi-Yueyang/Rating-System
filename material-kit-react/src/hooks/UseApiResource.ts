@@ -12,13 +12,14 @@ export interface Aspect{
     name:string;
     description:string;
     percentage:number;
-}  
+} 
 
 export interface ActivityWithAspect {
   name:string;
   dueDate:string;
   aspects:Aspect[];
 }
+
 async function fetchData<T>(endPoint:string, headers:Record<string, string>, params?: Record<string,any>):Promise<T[]>{
     const response = await axios.get(endPoint,{headers,params});
     return response.data;

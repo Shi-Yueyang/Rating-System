@@ -1,23 +1,37 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Divider,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { Stack } from '@mui/system';
+import { Cardholder } from '@phosphor-icons/react/dist/ssr';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { User } from '@/types/user';
-import { UseApiResources } from '@/hooks/UseApiResource';
+import { baseURL } from '@/config';
+import { paths } from '@/paths';
+import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
+import EditAspectCard from './EditAspectCard';
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
-import { paths } from '@/paths';
-import { useQueryClient } from '@tanstack/react-query';
-import { baseURL } from '@/config';
 
 export interface Resource {
   id: number;
+  resource_name: string;
   resource_file: string;
-  event:number;
+  event: number;
 }
 
 interface AssignmentFile {
@@ -51,27 +65,33 @@ const ActivityDetails = () => {
     queryKey: ['ActivityDetails-user_resource'],
     accessToken,
   });
-  const {useMutateResources:useMutateUserResources } = UseApiResources<UserResource>({
+  const { useMutateResources: useMutateUserResources } = UseApiResources<UserResource>({
     endPoint: `${baseURL}/rate/user-resource/bulk_create/`,
     accessToken,
     queryKey: ['ActivityDetails-bulk_create'],
-    contentType: 'multipart/form-data'
+    contentType: 'multipart/form-data',
   });
-  const {mutate:mutateUserResources} = useMutateUserResources('POST');
+
+  const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
+    endPoint: `${baseURL}/rate/aspects/`,
+    queryKey: ['aspects'],
+    accessToken,
+  });
+
+  const { mutate: mutateUserResources } = useMutateUserResources('POST');
 
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
     endPoint: `${baseURL}/rate/resources/`,
     queryKey: ['ActivityDetails-resources'],
     accessToken,
   });
-  
 
   // call hooks
   const { data: users } = fetchUsers();
   const { data: userResources } = fetchUserResource({ event_id: event_id });
-  const {data:resources} = fetchResources({event_id:event_id});
+  const { data: aspects } = fetchAspects({ event_id: event_id });
+  const { data: resources } = fetchResources({ event_id: event_id });
 
-  
   const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
     resources?.forEach((resource) => {
@@ -104,7 +124,7 @@ const ActivityDetails = () => {
   // without useEffect, it will cause infinite rerender
   useEffect(() => {
     initializeAssignments();
-  }, [userResources,resources]);
+  }, [userResources, resources]);
 
   // callbacks
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
@@ -125,7 +145,6 @@ const ActivityDetails = () => {
         user: user.id,
         resource: assignment.file instanceof File ? assignment.file : (assignment.file as Resource).id,
       }))
-
     );
     const formData = new FormData();
     userResourcePairs.forEach((pair, index) => {
@@ -143,7 +162,6 @@ const ActivityDetails = () => {
         queryClient.invalidateQueries({ queryKey: ['ActivityDetails-user_resource'] });
         router.push(paths.dashboard.activity);
       },
-
     });
   };
 
@@ -163,6 +181,7 @@ const ActivityDetails = () => {
 
   return (
     <>
+      <EditAspectCard aspects={aspects || []}></EditAspectCard>
       {/* First card: File upload section */}
       <Card
         sx={{
@@ -174,7 +193,7 @@ const ActivityDetails = () => {
           <Grid container direction="column" justifyContent="center" alignItems="center" spacing={2}>
             <Grid item>
               <Typography variant="h5" color="secondary">
-                上传文件
+                上传作品文件
               </Typography>{' '}
               {/* Primary color for text */}
             </Grid>
@@ -190,20 +209,29 @@ const ActivityDetails = () => {
       {/* Second card: List of uploaded files and multi-select options */}
       <Card
         sx={{
-          boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add shadow
+          boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
         }}
       >
+        <CardHeader
+          title="分配任务"
+          titleTypographyProps={{
+            variant: 'h5',
+            fontWeight: 'bold',
+            color: 'primary',
+          }}
+        />{' '}
         <CardContent>
           <Grid container direction="column" spacing={3}>
             {assignments.map((assignment, index) => (
               <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
                 <Grid item>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                    {assignment.file instanceof File 
-                    ? assignment.file.name 
-                    : (assignment.file as Resource).resource_file.split('/').pop()}
+                    {assignment.file instanceof File
+                      ? assignment.file.name
+                      : (assignment.file as Resource).resource_name}
                   </Typography>
                 </Grid>
+                
                 <Grid item>
                   <MultiSelect
                     users={users || []}
@@ -223,7 +251,7 @@ const ActivityDetails = () => {
       </Card>
 
       <Box display={'flex'} justifyContent={'center'} mt={3}>
-        <Button variant="outlined" color="primary" onClick={handleFileChange}>
+        <Button variant="contained" color="primary" onClick={handleFileChange}>
           提交
         </Button>
       </Box>
