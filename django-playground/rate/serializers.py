@@ -37,7 +37,7 @@ class UserReadSerializer(serializers.ModelSerializer):
 class ResourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Resource
-        fields = ['id', 'resource_file','event']
+        fields = ['id', 'resource_name','resource_file','event']
         
 
 class AspectSerializer(serializers.ModelSerializer):

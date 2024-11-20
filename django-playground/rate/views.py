@@ -55,15 +55,6 @@ class ResourceViewSet(viewsets.ModelViewSet):
                 raise NotFound(detail='Event not found')
         return queryset.distinct()
     
-    def retrieve(self, request, *args, **kwargs):
-        resource = self.get_object()
-        serializer = self.get_serializer(resource)
-        return Response(serializer.data)
-    
-    @transaction.atomic
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
-    def rate_resource(self,request):
-        print(request.data)
 
 class AspectViewSet(viewsets.ModelViewSet):
     queryset = Aspect.objects.all()
@@ -161,7 +152,11 @@ class UserResourceViewSet(viewsets.ModelViewSet):
         if aspects_scores:
             for aspect_score in aspects_scores:
                 try:
-                    UserResourceAspectScore.objects.create(user_resource=user_resource, aspect_id=aspect_score['aspect'], score=aspect_score['score'])
+                    UserResourceAspectScore.objects.update_or_create(
+                        user_resource=user_resource, 
+                        aspect_id=aspect_score['aspect'], 
+                        defaults={'score': aspect_score['score']}
+                    )
                 except Exception as e:
                     return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
