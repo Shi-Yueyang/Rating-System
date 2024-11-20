@@ -33,7 +33,7 @@ const RatingTaskList = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: useFetchUserResources } = UseApiResources<UserResourceFull>({
     endPoint:`${baseURL}/rate/user-resource/`,
-    queryKey: ['userscoreupload'],
+    queryKey: ['UserResource'],
     accessToken,
   });
   const { data: userResources } = useFetchUserResources({ event_id: event_id, user_id: user?.id });
