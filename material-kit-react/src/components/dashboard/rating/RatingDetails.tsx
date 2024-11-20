@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, Grid, InputLabel, TextField, Typography } from '@mui/material';
 import { baseURL } from '@/config';
-import { useUser } from '@/hooks/use-user';
 import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
+import { paths } from '@/paths';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface UserResource {
   id: number;
@@ -20,6 +21,8 @@ interface RatingScore {
 }
 
 const RatingDetails = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
     endPoint: `${baseURL}/rate/aspects/`,
@@ -30,7 +33,7 @@ const RatingDetails = () => {
 
   const { useMutateResources: useMutateUserResource } = UseApiResources<UserResource>({
     endPoint: `${baseURL}/rate/user-resource/${userResource_id}/detail_update/`,
-    queryKey: ['userscoreupload'],
+    queryKey: ['null'],
     accessToken,
   });
 
@@ -60,7 +63,12 @@ const RatingDetails = () => {
       score: rating.score,
     }));
     const dataToSend = {totalScore: score, userResourceAspectScore};
-    mutateUserResources(dataToSend);
+    mutateUserResources(dataToSend,{
+      onSuccess : () => {
+        queryClient.invalidateQueries({ queryKey: ['UserResource'] });
+        router.push(paths.ratingTasks + event_id);
+      }
+    });
   };
   return (
     <form onSubmit={handleSubmit}>
