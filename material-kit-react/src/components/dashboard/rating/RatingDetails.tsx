@@ -29,10 +29,11 @@ const RatingDetails = () => {
   const { event_id, userResource_id } = useParams();
 
   const { useMutateResources: useMutateUserResource } = UseApiResources<UserResource>({
-    endPoint: `${baseURL}/rate/user-resource/${userResource_id}/`,
+    endPoint: `${baseURL}/rate/user-resource/${userResource_id}/detail_update/`,
     queryKey: ['userscoreupload'],
     accessToken,
   });
+
   const { mutate: mutateUserResources } = useMutateUserResource('PATCH');
   const { data: aspects } = fetchAspects({ event_id: event_id });
   const [ratingScore, setRatingScore] = useState<RatingScore[]>([]);
@@ -54,10 +55,12 @@ const RatingDetails = () => {
     e.preventDefault();
     const score = ratingScore.reduce((acc, curr) => acc + curr.score, 0);
     const userResourceAspectScore = ratingScore.map((rating) => ({
+      user_resource: userResource_id,
       aspect: rating.aspectId,
       score: rating.score,
     }));
-    mutateUserResources({ score });
+    const dataToSend = {totalScore: score, userResourceAspectScore};
+    mutateUserResources(dataToSend);
   };
   return (
     <form onSubmit={handleSubmit}>
