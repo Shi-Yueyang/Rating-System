@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
 from core.permissions import IsAdminOrOrganizer
 from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer, UserResourceAspectScoreSerializer
 
@@ -165,48 +166,49 @@ class UserResourceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     @transaction.atomic
     def bulk_create(self, request):
+        # parse request data
+        new__resources = []
+        old_resources = []
         user_resource_pairs = []
         for key, value in request.data.items():
-            index = int(key.split('_')[1])
-            field = key.split('_')[2]
-            if len(user_resource_pairs) <= index:
-                user_resource_pairs.append({})
-            user_resource_pairs[index][field] = value
+            operation,index,field = key.split('_')
+            index = int(index)
+            if operation == 'newResourcefile':
+                if len(new__resources) <= index:
+                    new__resources.append({})
+                new__resources[index][field] = value
+            elif operation == 'oldResource':
+                if len(old_resources) <= index:
+                    old_resources.append({})
+                old_resources[index][field] = value
+            elif operation == 'userResourcePairs':
+                if len(user_resource_pairs) <= index:
+                    user_resource_pairs.append({})
+                user_resource_pairs[index][field] = value
+        # create new resources
+        for resource in new__resources:
+            resource_file = resource.get('resourceFile')
+            event_id = resource.get('event')
+            resource_name = resource.get('resourceName')
+            event = Event.objects.get(pk=event_id)
+            Resource.objects.create(event=event, resource_name=resource_name, resource_file=resource_file)
+        # update old resources
+        for resource in old_resources:
+            resource_id = resource.get('resource')
+            resource_name = resource.get('resourceName')
+            resource = Resource.objects.get(pk=resource_id)
+            resource.resource_name = resource_name
+            resource.save()
         
-        created_resources = []
         for pair in user_resource_pairs:
+            resource_name = pair.get('resourceName')
             user_id = pair.get('user')
-            resource_id = pair.get('resource')
-            resource_file = pair.get('resourcefile')
-            event_id = pair.get('event')
-            try:
-                user = User.objects.get(pk=user_id)
-            except User.DoesNotExist:
-                return Response({'error': f'User with id {user_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(pk=user_id)
+            resource = Resource.objects.get(resource_name=resource_name)
+            UserResource.objects.get_or_create(user=user, resource=resource)
 
-            if resource_id:
-                try:
-                    resource = Resource.objects.get(pk=resource_id)
-                except Resource.DoesNotExist:
-                    return Response({'error': f'Resource with id {resource_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                try:
-                    event = Event.objects.get(pk=event_id)
-                except Event.DoesNotExist:
-                    return Response({'error': f'Event with id {event_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-
-                resource_serializer = ResourceSerializer(data={'resource_file': resource_file, 'event': event.id})
-                try:
-                    resource_serializer.is_valid(raise_exception=True)
-                    resource = resource_serializer.save()
-                except Exception:
-                    return Response(resource_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-            user_resource, created = UserResource.objects.get_or_create(user=user, resource=resource)
-            if not created:
-                user_resource.save()
-                created_resources.append(user_resource)
-        return Response( status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_200_OK)
+        
     
 class UserResourceAspectScoreViewSet(viewsets.ModelViewSet):
     serializer_class = UserResourceAspectScoreSerializer

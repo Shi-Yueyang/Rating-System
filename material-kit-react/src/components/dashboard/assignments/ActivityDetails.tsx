@@ -79,7 +79,7 @@ const ActivityDetails = () => {
   const { useMutateResources: useMutateUserResources } = UseApiResources<UserResource>({
     endPoint: `${baseURL}/rate/user-resource/bulk_create/`,
     accessToken,
-    queryKey: ['ActivityDetails-bulk_create'],
+    queryKey: ['null'],
     contentType: 'multipart/form-data',
   });
 
@@ -97,13 +97,13 @@ const ActivityDetails = () => {
     accessToken,
   });
 
-  // call hooks
+  // states
+  const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
+  const [aspects, setAspects] = useState<Aspect[]>();
   const { data: users } = fetchUsers();
   const { data: userResources } = fetchUserResource({ event_id: event_id });
-  const [aspects, setAspects] = useState<Aspect[]>();
-
   const { data: resources } = fetchResources({ event_id: event_id });
-
+  
   const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
     resources?.forEach((resource) => {
@@ -112,7 +112,7 @@ const ActivityDetails = () => {
         users: [],
       };
     });
-
+    
     if (userResources && users) {
       userResources.forEach((userResource) => {
         const resourceId = userResource.resource.id;
@@ -122,19 +122,15 @@ const ActivityDetails = () => {
         }
       });
     }
-
+    
     return Object.values(assignmentMap);
   };
+  
 
-  // states
-  const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
-  const initializeAssignments = () => {
+  // call hooks
+  useEffect(() => {
     const transformedAssignments = transformUserScoresToAssignments();
     setAssignments(transformedAssignments);
-  };
-
-  useEffect(() => {
-    initializeAssignments();
   }, [userResources, resources]);
 
   const { data: aspectsData } = fetchAspects({ event_id: event_id });
@@ -183,16 +179,15 @@ const ActivityDetails = () => {
     // upload and rename
     assignments.forEach((assignment,id) => {
       if (isNotResource(assignment.resource)) {
-        formData.append(`newResourcefile_${id}_resourceFile`, assignment.resource.resource_file);
-        formData.append(`newResourcefile_${id}_event`, event_id.toString());
-        formData.append(`newResourcefile_${id}_resourceName`, assignment.resource.resource_name);
+        formData.append(`newResource_${id}_resourceFile`, assignment.resource.resource_file);
+        formData.append(`newResource_${id}_event`, event_id.toString());
+        formData.append(`newResource_${id}_resourceName`, assignment.resource.resource_name);
       }
       else{
-        formData.append(`oldResourcefile_${id}_resource`, assignment.resource.id.toString());
-        formData.append(`oldResourcefile_${id}_resourceName`, assignment.resource.resource_name);
+        formData.append(`oldResource_${id}_resource`, assignment.resource.id.toString());
+        formData.append(`oldResource_${id}_resourceName`, assignment.resource.resource_name);
       }
     });
-
 
     // upload userResourcePairs
     const userResourcePairs = assignments.flatMap((assignment) =>
@@ -207,10 +202,11 @@ const ActivityDetails = () => {
       formData.append(`userResourcePairs_${index}_resourceName`, pair.resourceName.toString());
     });
 
-    console.log('formData', formData);
     mutateUserResources(formData, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['ActivityDetails-user_resource'] });
+        queryClient.invalidateQueries({ queryKey: ['ActivityDetails-resources'] });
+        queryClient.invalidateQueries({ queryKey: ['ActivityDetails-users'] });
         router.push(paths.dashboard.activity);
       },
     });
