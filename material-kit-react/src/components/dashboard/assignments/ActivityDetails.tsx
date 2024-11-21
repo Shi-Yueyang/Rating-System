@@ -17,6 +17,7 @@ import {
 import { Stack } from '@mui/system';
 import { Cardholder } from '@phosphor-icons/react/dist/ssr';
 import { useQueryClient } from '@tanstack/react-query';
+import { set } from 'react-hook-form';
 
 import { User } from '@/types/user';
 import { baseURL } from '@/config';
@@ -26,7 +27,6 @@ import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 import EditAspectCard from './EditAspectCard';
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
-import { set } from 'react-hook-form';
 
 export interface Resource {
   id: number;
@@ -35,15 +35,15 @@ export interface Resource {
   event: number;
 }
 
-interface NewResource{
-  resource_file:File;
-  resource_name:string;
-  event:number
+interface NewResource {
+  resource_file: File;
+  resource_name: string;
+  event: number;
 }
 
 const isNotResource = (resource: any): resource is NewResource => {
   return (resource as Resource).id === undefined;
-}
+};
 
 interface AssignmentFile {
   resource: NewResource | Resource;
@@ -67,13 +67,13 @@ const ActivityDetails = () => {
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
     endPoint: `${baseURL}/rate/users/`,
-    queryKey: ['ActivityDetails-users'],
+    queryKey: ['users'],
     accessToken,
   });
 
   const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
     endPoint: `${baseURL}/rate/user-resource/`,
-    queryKey: ['ActivityDetails-user_resource'],
+    queryKey: ['user_resources', event_id.toString()],
     accessToken,
   });
   const { useMutateResources: useMutateUserResources } = UseApiResources<UserResource>({
@@ -85,7 +85,7 @@ const ActivityDetails = () => {
 
   const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
     endPoint: `${baseURL}/rate/aspects/`,
-    queryKey: ['aspects'],
+    queryKey: ['aspects', event_id.toString()],
     accessToken,
   });
 
@@ -93,7 +93,7 @@ const ActivityDetails = () => {
 
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
     endPoint: `${baseURL}/rate/resources/`,
-    queryKey: ['ActivityDetails-resources'],
+    queryKey: ['resources', event_id.toString()],
     accessToken,
   });
 
@@ -103,7 +103,7 @@ const ActivityDetails = () => {
   const { data: users } = fetchUsers();
   const { data: userResources } = fetchUserResource({ event_id: event_id });
   const { data: resources } = fetchResources({ event_id: event_id });
-  
+
   const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
     resources?.forEach((resource) => {
@@ -112,7 +112,7 @@ const ActivityDetails = () => {
         users: [],
       };
     });
-    
+
     if (userResources && users) {
       userResources.forEach((userResource) => {
         const resourceId = userResource.resource.id;
@@ -122,10 +122,9 @@ const ActivityDetails = () => {
         }
       });
     }
-    
+
     return Object.values(assignmentMap);
   };
-  
 
   // call hooks
   useEffect(() => {
@@ -167,23 +166,22 @@ const ActivityDetails = () => {
   const handleFileNameChange = (index: number, value: string) => {
     const newAssignments = assignments.map((assignment, i) => {
       if (i === index) {
-        return {...assignment, resource: { ...assignment.resource, resource_name: value } };
+        return { ...assignment, resource: { ...assignment.resource, resource_name: value } };
       }
-      return assignment
+      return assignment;
     });
     setAssignments(newAssignments);
-  }
+  };
 
   const handleSubmit = () => {
     const formData = new FormData();
     // upload and rename
-    assignments.forEach((assignment,id) => {
+    assignments.forEach((assignment, id) => {
       if (isNotResource(assignment.resource)) {
         formData.append(`newResource_${id}_resourceFile`, assignment.resource.resource_file);
         formData.append(`newResource_${id}_event`, event_id.toString());
         formData.append(`newResource_${id}_resourceName`, assignment.resource.resource_name);
-      }
-      else{
+      } else {
         formData.append(`oldResource_${id}_resource`, assignment.resource.id.toString());
         formData.append(`oldResource_${id}_resourceName`, assignment.resource.resource_name);
       }
@@ -192,7 +190,7 @@ const ActivityDetails = () => {
     // upload userResourcePairs
     const userResourcePairs = assignments.flatMap((assignment) =>
       assignment.users.map((user) => ({
-        resourceName:assignment.resource.resource_name,
+        resourceName: assignment.resource.resource_name,
         user: user.id,
       }))
     );
@@ -204,9 +202,8 @@ const ActivityDetails = () => {
 
     mutateUserResources(formData, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['ActivityDetails-user_resource'] });
-        queryClient.invalidateQueries({ queryKey: ['ActivityDetails-resources'] });
-        queryClient.invalidateQueries({ queryKey: ['ActivityDetails-users'] });
+        queryClient.invalidateQueries({ queryKey: ['user_resources', event_id.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['resources', event_id.toString()] });
         router.push(paths.dashboard.activity);
       },
     });
@@ -217,8 +214,12 @@ const ActivityDetails = () => {
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
       if (event.target.files !== null && event.target?.files?.length > 0) {
         const files = event.target.files;
-        const resource:NewResource = { resource_file: files[0], resource_name: "" ,event: parseInt(event_id as string)};
-        const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ resource, users: [] as User[] } ));
+        const resource: NewResource = {
+          resource_file: files[0],
+          resource_name: '',
+          event: parseInt(event_id as string),
+        };
+        const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ resource, users: [] as User[] }));
         setAssignments((prev) => [...prev, ...newAssignments]);
       }
     },
@@ -274,9 +275,19 @@ const ActivityDetails = () => {
               <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
                 <Grid item xs={12}>
                   <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                    {isNotResource(assignment.resource)
+                  <a
+                    href={isNotResource(assignment.resource)
+                      ? URL.createObjectURL(assignment.resource.resource_file) // new file
+                      : assignment.resource.resource_file}
+                    download={isNotResource(assignment.resource)
                       ? assignment.resource.resource_file.name
-                      : (assignment.resource as Resource).resource_file.split('/').pop()}
+                      : decodeURIComponent((assignment.resource as Resource).resource_file.split('/').pop() || "")}
+                    // style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
+                    {isNotResource(assignment.resource)
+                      ? assignment.resource.resource_file.name // new file
+                      : decodeURIComponent((assignment.resource as Resource).resource_file.split('/').pop() || "")}
+                  </a>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -294,14 +305,13 @@ const ActivityDetails = () => {
                     selectedUsers={assignment.users}
                   />
                 </Grid>
-                {
-                  isNotResource(assignment.resource) && 
+                {isNotResource(assignment.resource) && (
                   <Grid item xs={12}>
                     <Button variant="outlined" color="error" onClick={() => handleFileDelete(index)}>
                       删除
                     </Button>
                   </Grid>
-                }
+                )}
                 <Grid item xs={12}>
                   <Divider />
                 </Grid>
