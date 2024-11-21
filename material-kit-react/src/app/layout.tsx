@@ -5,6 +5,7 @@ import type { Viewport } from 'next';
 import '@/styles/global.css';
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { UserProvider } from '@/contexts/user-context';
 import { LocalizationProvider } from '@/components/core/localization-provider';
@@ -27,6 +28,7 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
             <ThemeProvider>
               <QueryClientProvider client={queryClient}>
                 {children}
+                <ReactQueryDevtools initialIsOpen={false} />
               </QueryClientProvider>
             </ThemeProvider>
           </UserProvider>
