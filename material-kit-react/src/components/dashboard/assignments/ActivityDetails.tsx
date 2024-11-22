@@ -150,17 +150,8 @@ const ActivityDetails = () => {
     mutateActivity(newActivity);
   };
 
-  const handleAspectChange = (index: number, field: keyof Aspect, value: any) => {
-    if (aspects === undefined) return;
-    const newAspects = aspects.map((aspect, i) => {
-      if (i === index) {
-        return { ...aspect, [field]: value };
-      } else {
-        return aspect;
-      }
-    });
-
-    setAspects(newAspects);
+  const handleAspectChange = (newAspectss:Aspect[]) => {
+    setAspects(newAspectss);
   };
 
   const handleUserChange = (assignmentId: number, selectedUsers: User[]) => {
