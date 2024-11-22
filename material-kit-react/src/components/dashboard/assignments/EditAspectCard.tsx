@@ -93,7 +93,7 @@ const [isEditing, setIsEditing] = useState(false);
       <Divider />
       <CardActions sx={{ justifyContent: 'flex-end', paddingX: 2 }}>
         <Button onClick={() => setIsEditing(true)} disabled={isEditing} variant="contained" color="primary">
-          编辑
+        {isEditing ? '提交' : '编辑'}
         </Button>
         <Button
           onClick={() => setIsEditing(false)}
