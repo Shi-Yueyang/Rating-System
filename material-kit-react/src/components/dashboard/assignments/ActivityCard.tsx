@@ -1,22 +1,24 @@
 import React from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
-import { Activity } from '@/hooks/UseApiResource';
 import { useRouter } from 'next/navigation';
-import { paths } from '@/paths';
+import { Card, CardContent, Typography } from '@mui/material';
 
+import { paths } from '@/paths';
+import { Activity } from '@/hooks/UseApiResource';
 
 interface Props {
   activity: Activity;
-  onClick:()=>void;
+  onClick: () => void;
 }
 
-const ActivityCard = ({ activity,onClick }: Props) => {
+const ActivityCard = ({ activity, onClick }: Props) => {
   const router = useRouter();
-
 
   return (
     <Card
-      sx={{ display: 'flex', flexDirection: 'column', height: '100%', cursor: 'pointer' }} // Add cursor to indicate it's clickable
+      sx={{
+        boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add some shadow for depth
+        marginBottom: 3, // Space below the card
+      }}
       onClick={onClick} // Make the card clickable
     >
       <CardContent>
