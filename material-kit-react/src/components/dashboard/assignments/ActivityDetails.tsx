@@ -2,28 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { Stack } from '@mui/system';
-import { Cardholder } from '@phosphor-icons/react/dist/ssr';
+import { Box, Button, Card, CardContent, CardHeader, Divider, Grid, TextField, Typography } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
-import { set } from 'react-hook-form';
 
 import { User } from '@/types/user';
 import { baseURL } from '@/config';
 import { paths } from '@/paths';
-import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
+import { Activity, Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
+import ActivityTitleCard from './ActivityTitleCard';
+import AsignActivitiesCard from './AsignActivitiesCard';
 import EditAspectCard from './EditAspectCard';
 import { FileUpload, FileUploadProps } from './FileUpload';
 import MultiSelect from './MultiSelect';
@@ -41,11 +29,11 @@ interface NewResource {
   event: number;
 }
 
-const isNotResource = (resource: any): resource is NewResource => {
+export const isNotResource = (resource: any): resource is NewResource => {
   return (resource as Resource).id === undefined;
 };
 
-interface AssignmentFile {
+export interface AssignmentFile {
   resource: NewResource | Resource;
   users: User[];
 }
@@ -64,6 +52,11 @@ const ActivityDetails = () => {
   const queryClient = useQueryClient();
 
   const accessToken = localStorage.getItem('custom-auth-token');
+  const { useFetchSingleResource: useFetchSingleActivity, useMutateResources:useMutateActivity } = UseApiResources<Activity>({
+    endPoint: `${baseURL}/rate/events/`+event_id+'/',
+    queryKey: ['events', event_id.toString()],
+    accessToken,
+  });
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
     endPoint: `${baseURL}/rate/users/`,
@@ -90,7 +83,7 @@ const ActivityDetails = () => {
   });
 
   const { mutate: mutateUserResources } = useMutateUserResources('POST');
-
+  const {mutate:mutateActivity}=useMutateActivity('PATCH');
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
     endPoint: `${baseURL}/rate/resources/`,
     queryKey: ['resources', event_id.toString()],
@@ -100,6 +93,10 @@ const ActivityDetails = () => {
   // states
   const [assignments, setAssignments] = useState<AssignmentFile[]>([]);
   const [aspects, setAspects] = useState<Aspect[]>();
+  const [activity, setActivity] = useState<Activity>();
+
+  const { data: activityData } = useFetchSingleActivity();
+  const { data: aspectsData } = fetchAspects({ event_id: event_id });
   const { data: users } = fetchUsers();
   const { data: userResources } = fetchUserResource({ event_id: event_id });
   const { data: resources } = fetchResources({ event_id: event_id });
@@ -132,12 +129,27 @@ const ActivityDetails = () => {
     setAssignments(transformedAssignments);
   }, [userResources, resources]);
 
-  const { data: aspectsData } = fetchAspects({ event_id: event_id });
   useEffect(() => {
     setAspects(aspectsData);
-  }, [event_id]);
+  }, [aspectsData]);
 
+  useEffect(() => {
+    if(activityData){
+      const newActivity: Activity = {
+        id: activityData.id,
+        name: activityData.name,
+        dueDate: activityData.dueDate,
+      };
+      setActivity(newActivity);
+    }
+  }, [activityData]);
   // callbacks
+
+  const handleActivityChange = (newActivity: Activity) => {
+    setActivity(newActivity);
+    mutateActivity(newActivity);
+  };
+
   const handleAspectChange = (index: number, field: keyof Aspect, value: any) => {
     if (aspects === undefined) return;
     const newAspects = aspects.map((aspect, i) => {
@@ -163,10 +175,10 @@ const ActivityDetails = () => {
     setAssignments((prevAssignments) => prevAssignments.filter((_, i) => i !== id));
   };
 
-  const handleFileNameChange = (index: number, value: string) => {
+  const handleFileNameChange = (index: number, fileName: string) => {
     const newAssignments = assignments.map((assignment, i) => {
       if (i === index) {
-        return { ...assignment, resource: { ...assignment.resource, resource_name: value } };
+        return { ...assignment, resource: { ...assignment.resource, resource_name: fileName } };
       }
       return assignment;
     });
@@ -230,22 +242,30 @@ const ActivityDetails = () => {
 
   return (
     <>
+      <ActivityTitleCard
+        activity={activity ? activity : ({} as Activity)}
+        handleActivityChange={handleActivityChange}
+      />
+
       <EditAspectCard aspects={aspects || []} handleAspectChange={handleAspectChange}></EditAspectCard>
-      {/* First card: File upload section */}
+
       <Card
         sx={{
           boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add some shadow for depth
           marginBottom: 3, // Space below the card
         }}
       >
+        <CardHeader
+          title="上传文件"
+          titleTypographyProps={{
+            variant: 'h5',
+            fontWeight: 'bold',
+            color: 'primary',
+          }}
+        />
         <CardContent>
           <Grid container direction="column" justifyContent="center" alignItems="center" spacing={2}>
-            <Grid item>
-              <Typography variant="h5" color="secondary">
-                上传作品文件
-              </Typography>{' '}
-              {/* Primary color for text */}
-            </Grid>
+            <Grid item></Grid>
             <Grid item>
               <Box mt={2}>
                 <FileUpload {...fileUploadProp} />
@@ -255,71 +275,13 @@ const ActivityDetails = () => {
         </CardContent>
       </Card>
 
-      {/* Second card: List of uploaded files and multi-select options */}
-      <Card
-        sx={{
-          boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
-        }}
-      >
-        <CardHeader
-          title="分配任务"
-          titleTypographyProps={{
-            variant: 'h5',
-            fontWeight: 'bold',
-            color: 'primary',
-          }}
-        />{' '}
-        <CardContent>
-          <Grid container direction="column" spacing={3}>
-            {assignments.map((assignment, index) => (
-              <Grid item key={index} container justifyContent="center" alignItems="center" spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant="body1" color="textSecondary" style={{ marginRight: 16 }}>
-                  <a
-                    href={isNotResource(assignment.resource)
-                      ? URL.createObjectURL(assignment.resource.resource_file) // new file
-                      : assignment.resource.resource_file}
-                    download={isNotResource(assignment.resource)
-                      ? assignment.resource.resource_file.name
-                      : decodeURIComponent((assignment.resource as Resource).resource_file.split('/').pop() || "")}
-                    // style={{ textDecoration: 'none', color: 'inherit' }}
-                  >
-                    {isNotResource(assignment.resource)
-                      ? assignment.resource.resource_file.name // new file
-                      : decodeURIComponent((assignment.resource as Resource).resource_file.split('/').pop() || "")}
-                  </a>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="作品名"
-                    fullWidth
-                    onChange={(e) => handleFileNameChange(index, e.target.value)}
-                    value={assignment.resource.resource_name}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <MultiSelect
-                    users={users || []}
-                    onChange={(selectedUsers) => handleUserChange(index, selectedUsers)}
-                    selectedUsers={assignment.users}
-                  />
-                </Grid>
-                {isNotResource(assignment.resource) && (
-                  <Grid item xs={12}>
-                    <Button variant="outlined" color="error" onClick={() => handleFileDelete(index)}>
-                      删除
-                    </Button>
-                  </Grid>
-                )}
-                <Grid item xs={12}>
-                  <Divider />
-                </Grid>
-              </Grid>
-            ))}
-          </Grid>
-        </CardContent>
-      </Card>
+      <AsignActivitiesCard
+        assignments={assignments}
+        users={users || []}
+        handleFileNameChange={handleFileNameChange}
+        handleFileDelete={handleFileDelete}
+        handleUserChange={handleUserChange}
+      ></AsignActivitiesCard>
 
       <Box display={'flex'} justifyContent={'center'} mt={3}>
         <Button variant="contained" color="primary" onClick={handleSubmit}>
