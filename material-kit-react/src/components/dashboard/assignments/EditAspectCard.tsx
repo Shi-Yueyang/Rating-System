@@ -1,15 +1,42 @@
-import { Aspect } from '@/hooks/UseApiResource';
-import { Card, CardHeader, CardContent, Grid, Typography, TextField, Divider, CardActions, Button } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Divider,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Stack } from '@mui/system';
-import React, { useState } from 'react';
 
-interface Props{
-    aspects:Aspect[];
-    handleAspectChange: (index: number, field: keyof Aspect, value: any) => void;
+import { Aspect } from '@/hooks/UseApiResource';
+
+interface Props {
+  aspects: Aspect[];
+  handleAspectChange: (newAspects:Aspect[]) => void;
 }
 
-const EditAspectCard = ({aspects,handleAspectChange}:Props) => {
-const [isEditing, setIsEditing] = useState(false);
+const EditAspectCard = ({ aspects, handleAspectChange }: Props) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedAspects, setEditedAspects] = useState(aspects);
+  const [initialAspects, setInitialAspects] = useState(aspects);
+  useEffect(() => {
+    setEditedAspects(aspects);
+    setInitialAspects(aspects);
+  }, [aspects]);
+
+  const handleCancel = () => {
+    setEditedAspects(initialAspects);
+    setIsEditing(false);
+  };
+
+  const handleSave = () => {
+    setIsEditing(false);
+    handleAspectChange(editedAspects);
+  };
 
   return (
     <Card
@@ -30,14 +57,14 @@ const [isEditing, setIsEditing] = useState(false);
       />
       <CardContent>
         <Grid container direction="column" spacing={3}>
-          {aspects?.map((aspect, index) => (
-            <Grid item xs={12} key={index}>
+          {editedAspects?.map((aspect, index) => (
+            <Grid item xs={12} key={index} mb={2}>
               <Stack spacing={2}>
-                <Typography variant="h6" color="secondary">
+                <Typography variant="h6" color="secondary" mb={2}>
                   {`No ${index + 1}`}
                 </Typography>
                 {isEditing ? (
-                  <>
+                  <Stack spacing={3}>
                     <TextField
                       label="标准名称"
                       type="text"
@@ -45,7 +72,11 @@ const [isEditing, setIsEditing] = useState(false);
                       value={aspect.name}
                       variant="outlined"
                       size="small"
-                      onChange={(e) => handleAspectChange(index, 'name', e.target.value)}
+                      onChange={(e) => setEditedAspects((prev) => {
+                        const newAspects = [...prev];
+                        newAspects[index].name = e.target.value;
+                        return newAspects;
+                      })}
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
                     <TextField
@@ -55,7 +86,12 @@ const [isEditing, setIsEditing] = useState(false);
                       value={aspect.percentage}
                       variant="outlined"
                       size="small"
-                      onChange={(e) => handleAspectChange(index, 'percentage', e.target.value)}
+                      onChange={(e) => setEditedAspects((prev) => {
+                        const newAspects = [...prev];
+                        newAspects[index].percentage = parseInt(e.target.value);
+                        return newAspects;
+                      }
+                      )}
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
                     <TextField
@@ -63,12 +99,17 @@ const [isEditing, setIsEditing] = useState(false);
                       type="text"
                       fullWidth
                       value={aspect.description}
-                      onChange={(e) => handleAspectChange(index, 'description', e.target.value)}
+                      onChange={(e) => setEditedAspects((prev) => {
+                        const newAspects = [...prev];
+                        newAspects[index].description = e.target.value;
+                        return newAspects;
+
+                      })}
                       variant="outlined"
                       size="small"
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
-                  </>
+                  </Stack>
                 ) : (
                   <>
                     <Typography>
@@ -91,19 +132,15 @@ const [isEditing, setIsEditing] = useState(false);
         </Grid>
       </CardContent>
       <Divider />
-      <CardActions sx={{ justifyContent: 'flex-end', paddingX: 2 }}>
-        <Button onClick={() => setIsEditing(true)} disabled={isEditing} variant="contained" color="primary">
-        {isEditing ? '提交' : '编辑'}
-        </Button>
-        <Button
-          onClick={() => setIsEditing(false)}
-          disabled={!isEditing}
-          variant="outlined"
-          color="error"
-          sx={{ marginLeft: 2 }}
-        >
-          取消
-        </Button>
+      <CardActions>
+        {isEditing ? (
+          <>
+            <Button onClick={handleSave} color="primary">保存</Button>
+            <Button onClick={handleCancel} color="secondary">取消</Button>
+          </>
+        ) : (
+          <Button onClick={() => setIsEditing(true)} color="primary">编辑</Button>
+        )}
       </CardActions>
     </Card>
   );
