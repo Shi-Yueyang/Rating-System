@@ -6,7 +6,6 @@ class CustomUser(AbstractUser):
     realname = models.CharField(max_length=100, null=True, blank=True)
     def save(self,*args,**kwargs):
         if not self.password.startswith("pbkdf2_"):
-            print('aaa')
             self.set_password(self.password)
 
         if self.pk:

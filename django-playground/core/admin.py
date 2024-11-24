@@ -3,15 +3,15 @@ from .models import CustomUser
 
 class CustomUserAdmin(admin.ModelAdmin):
     model = CustomUser
-    list_display = ('username', 'email', 'avatar', 'realname')  # Add 'realname' to the list_display
+    list_display = ('username', 'email', 'avatar', 'realname')  
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'password', 'avatar', 'realname')}),  # Add 'realname' to the fieldsets
-        ('Permissions', {'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')}),  # Add 'groups' and 'permissions'
+        (None, {'fields': ('username', 'email', 'password', 'avatar', 'realname')}),  
+        ('Permissions', {'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')}),  
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2', 'avatar', 'realname'),  # Add 'realname' to the add_fieldsets
+            'fields': ('username', 'email', 'password1', 'password2', 'avatar', 'realname'),  
         }),
     )
     filter_horizontal = ('groups', 'user_permissions',)

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, Divider, Typography } from '@mui/material';
 
 import { paths } from '@/paths';
 import { Activity } from '@/hooks/UseApiResource';
@@ -19,7 +19,6 @@ const ActivityCard = ({ activity, onClick }: Props) => {
         boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add some shadow for depth
         marginBottom: 3, // Space below the card
       }}
-      onClick={onClick} // Make the card clickable
     >
       <CardContent>
         <Typography variant="h5" component="div" gutterBottom>
@@ -29,6 +28,13 @@ const ActivityCard = ({ activity, onClick }: Props) => {
           截至日期: {activity.dueDate}
         </Typography>
       </CardContent>
+      <Divider />
+      
+      <CardActions>
+        <Button variant="outlined" color="primary" onClick={onClick}>
+          查看详情
+        </Button>
+      </CardActions>
     </Card>
   );
 };

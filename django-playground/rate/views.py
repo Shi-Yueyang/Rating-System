@@ -85,7 +85,6 @@ class AspectViewSet(viewsets.ModelViewSet):
         return Response(updated_aspects, status=status.HTTP_200_OK)
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
