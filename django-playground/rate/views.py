@@ -70,6 +70,22 @@ class AspectViewSet(viewsets.ModelViewSet):
             return queryset
         return super().get_queryset()
 
+    @transaction.atomic
+    @action(detail=False, methods=['patch'], permission_classes=[IsAdminOrOrganizer], url_path='batch-update')
+    def batch_update(self, request):
+        data = request.data
+        updated_aspects = []
+        for aspect_data in data:
+            aspect = Aspect.objects.get(id=aspect_data['id'])
+            serializer = self.get_serializer(aspect, data=aspect_data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            updated_aspects.append(serializer.data)
+
+        return Response(updated_aspects, status=status.HTTP_200_OK)
+
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -136,7 +152,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-    @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['patch'], permission_classes=[IsAuthenticated])
     @transaction.atomic
     def detail_update(self,request,pk=None):
         try:
@@ -163,7 +179,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
         
         return Response(status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny],url_name='bulk-create')
     @transaction.atomic
     def bulk_create(self, request):
         # parse request data
