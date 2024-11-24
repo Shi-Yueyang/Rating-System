@@ -48,7 +48,7 @@ class AuthClient {
         formData.append('avatar', params.avatar);
       }
 
-      const response = await axios.post(`${baseURL}/rate/users`,formData,{
+      const response = await axios.post(`${baseURL}/rate/users/`,formData,{
         headers: {
           "Content-Type": "multipart/form-data", // Important for file uploads
         },
@@ -130,7 +130,7 @@ class AuthClient {
     console.log("[getUser] found token")
 
     return axios
-      .get(`${baseURL}/rate/users/me`, {
+      .get(`${baseURL}/rate/users/me/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
