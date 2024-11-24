@@ -15,7 +15,7 @@ const ActivityPage = () => {
   const { useFetchResources: useActivities } = UseApiResources<Activity>({
     endPoint: `${baseURL}/rate/events/`,
     accessToken,
-    queryKey: ['activity'],
+    queryKey: ['activities'],
   });
   const { data: activities } = useActivities();
   const router = useRouter();
