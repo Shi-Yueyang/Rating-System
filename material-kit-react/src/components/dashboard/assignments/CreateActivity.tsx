@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { baseURL } from '@/config';
 import { paths } from '@/paths';
 import { ActivityWithAspect, Aspect, UseApiResources } from '@/hooks/UseApiResource';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Zod validation schema
 const schema = z.object({
@@ -53,6 +54,7 @@ const CreateActivity = () => {
   const [errorCreateActivity, setErrorCreateActivity] = useState<string | null>(null);
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { useMutateResources: useMutateActivityWithAspect } = UseApiResources<ActivityWithAspect>({
     endPoint: `${baseURL}/rate/events/`,
@@ -81,11 +83,10 @@ const CreateActivity = () => {
         );
       },
       onSuccess:()=>{
+        queryClient.invalidateQueries({ queryKey: ['activities'] });
         router.push(paths.dashboard.activity);
       }
     });
-
-
   };
 
   return (
