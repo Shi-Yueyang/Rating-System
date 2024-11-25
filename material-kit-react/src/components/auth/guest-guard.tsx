@@ -31,8 +31,12 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
     }
 
     if (user) {
-      logger.debug('[GuestGuard]: User is logged in, redirecting to dashboard');
-      router.replace(paths.dashboard.activity);
+      logger.debug('[GuestGuard]: User is logged in, redirecting',user);
+      if(user.is_staff || user.groups.includes('admin')){
+        router.replace(paths.dashboard.assignment.base);
+      }else{
+        router.replace(paths.dashboard.rating.base);
+      }
       return;
     }
 
@@ -50,8 +54,6 @@ export function GuestGuard({ children }: GuestGuardProps): React.JSX.Element | n
     logger.debug('[GuestGuard]: isChecking');
     return null;
   }
-
-
 
   return <React.Fragment>{children}</React.Fragment>;
 }

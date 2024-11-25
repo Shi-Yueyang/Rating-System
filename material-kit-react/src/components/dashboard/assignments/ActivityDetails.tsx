@@ -218,7 +218,7 @@ const ActivityDetails = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['user_resources', event_id.toString()] });
         queryClient.invalidateQueries({ queryKey: ['resources', event_id.toString()] });
-        router.push(paths.dashboard.activity);
+        router.push(paths.dashboard.assignment.base);
       },
     });
   };

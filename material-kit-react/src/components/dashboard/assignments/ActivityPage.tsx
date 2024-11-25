@@ -20,7 +20,7 @@ const ActivityPage = () => {
   const { data: activities } = useActivities();
   const router = useRouter();
   const handleCreateAssignment = () => {
-    router.push(paths.createEvent); // Navigate to the page where new assignments can be created
+    router.push(paths.dashboard.assignment.create); // Navigate to the page where new assignments can be created
   };
 
   return (
@@ -31,7 +31,7 @@ const ActivityPage = () => {
             <ActivityCard
               activity={activity}
               onClick={() => {
-                router.push(paths.eventDetails + activity.id);
+                router.push(paths.dashboard.assignment.details+'/' + activity.id);
               }}
             ></ActivityCard>
           </Grid>
