@@ -1,10 +1,14 @@
-import CreateActivity from '@/components/dashboard/assignments/CreateActivity'
-import React from 'react'
+import React from 'react';
+
+import CreateActivity from '@/components/dashboard/assignments/CreateActivity';
+import { StaffOrOrganizerGuard } from '@/components/dashboard/StaffOrOrganizerGuard';
 
 const page = () => {
   return (
-    <CreateActivity/>
-  )
-}
+    <StaffOrOrganizerGuard>
+      <CreateActivity />
+    </StaffOrOrganizerGuard>
+  );
+};
 
-export default page
+export default page;
