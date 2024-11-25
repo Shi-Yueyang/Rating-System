@@ -37,7 +37,7 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
   const { user } = useUser();
   const accessToken = localStorage.getItem('custom-auth-token');
   const{useMutateResources:useMutateUser} = UseApiResources<User>({
-    endPoint: `${baseURL}/users/${user?.id}/`,
+    endPoint: `${baseURL}/rate/users/${user?.id}/`,
     queryKey: ['users', String(user?.id)],
     accessToken,
     contentType: 'multipart/form-data',

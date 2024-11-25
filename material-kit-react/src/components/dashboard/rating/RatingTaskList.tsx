@@ -64,7 +64,7 @@ const RatingTaskList = () => {
                       variant="outlined"
                       color="primary"
                       onClick={() => {
-                        router.push(paths.ratingTasks + event_id + '/' + userResource.id);
+                        router.push(paths.dashboard.rating.tasks +'/' + event_id + '/' + userResource.id);
                       }}
                     >
                       点评
