@@ -17,8 +17,9 @@ import { paths } from '@/paths';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { Logo } from '@/components/core/logo';
 
-import { staffNavItems } from './config';
+import { staffNavItems, userNavItems } from './config';
 import { navIcons } from './nav-icons';
+import { useUser } from '@/hooks/use-user';
 
 export interface MobileNavProps {
   onClose?: () => void;
@@ -28,7 +29,8 @@ export interface MobileNavProps {
 
 export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element {
   const pathname = usePathname();
-
+  const { user } = useUser();
+  const is_staff_or_org = user?.is_staff || user?.groups?.includes('Organizer');
   return (
     <Drawer
       PaperProps={{
@@ -65,7 +67,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
-        {renderNavItems({ pathname, items: staffNavItems })}
+      {renderNavItems({ pathname, items: is_staff_or_org ? staffNavItems : userNavItems })}
       </Box>
 
     </Drawer>
