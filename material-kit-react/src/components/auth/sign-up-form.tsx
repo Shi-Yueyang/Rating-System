@@ -111,9 +111,8 @@ export function SignUpForm(): React.JSX.Element {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      console.log("[handleFileChange] has avator")
       const file = event.target.files[0];
-      setAvatarFile(event.target.files[0]);
+      setAvatarFile(file);
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
     }
