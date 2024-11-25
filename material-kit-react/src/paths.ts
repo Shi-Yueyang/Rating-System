@@ -1,15 +1,28 @@
 export const paths = {
   home: '/',
-  auth: { signIn: '/auth/sign-in', signUp: '/auth/sign-up', resetPassword: '/auth/reset-password' },
+  auth: {
+    base: '/auth',
+    signIn: '/auth/sign-in',
+    signUp: '/auth/sign-up',
+    resetPassword: '/auth/reset-password',
+  },
   dashboard: {
+    base: '/dashboard',
     account: '/dashboard/account',
     customers: '/dashboard/customers',
-    activity: '/dashboard/assignment', 
-    rating: '/dashboard/rating',
+    assignment: {
+      base: '/dashboard/assignment',
+      create: '/dashboard/assignment/create',
+      details: '/dashboard/assignment/details',
+    },
+    rating: {
+      base: '/dashboard/rating',
+      tasks: '/dashboard/rating/tasks',
+      details: '/dashboard/rating/details',
+    },
   },
-  createEvent:'/dashboard/assignment/create',
-  eventDetails:'/dashboard/assignment/details/',
-  ratingTasks:'/dashboard/rating/tasks/',
-  ratingDetails:'/dashboard/rating/details/',
-  errors: { notFound: '/errors/not-found' },
+  errors: {
+    base: '/errors',
+    notFound: '/errors/not-found',
+  },
 } as const;

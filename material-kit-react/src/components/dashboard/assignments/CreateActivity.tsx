@@ -84,7 +84,7 @@ const CreateActivity = () => {
       },
       onSuccess:()=>{
         queryClient.invalidateQueries({ queryKey: ['activities'] });
-        router.push(paths.dashboard.activity);
+        router.push(paths.dashboard.assignment.base);
       }
     });
   };
