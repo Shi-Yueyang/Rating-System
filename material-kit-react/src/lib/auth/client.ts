@@ -37,7 +37,7 @@ interface SignUpFieldErrors {
 class AuthClient {
   async signUp(params: SignUpParams): Promise<{ error?: string,fieldErrors?: SignUpFieldErrors }> {
     // Make API request
-    console.log('SignUpParams '+params);
+    console.log('SignUpParams ',params);
     try{
       const formData = new FormData();
       formData.append('username', params.username);
