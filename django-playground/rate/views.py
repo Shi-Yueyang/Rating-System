@@ -7,13 +7,17 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
-from django.core.exceptions import ObjectDoesNotExist
 from core.permissions import IsAdminOrOrganizer
 from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer, UserResourceAspectScoreSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [IsAdminOrOrganizer]
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = [IsAdminOrOrganizer]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
     
     def get_queryset(self):
         queryset = Event.objects.all()
@@ -25,12 +29,13 @@ class EventViewSet(viewsets.ModelViewSet):
                 raise NotFound(detail='User not found')    
         return queryset.distinct()
 
+        permission_classes = [IsAdminOrOrganizer]
+
+
     @transaction.atomic
     def create(self, request):
-        print('Creating event')
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
-            print('Validated')
             event = serializer.save()
             return Response({'id': event.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -151,7 +156,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-    @action(detail=False, methods=['patch'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['patch'], permission_classes=[IsAuthenticated])
     @transaction.atomic
     def detail_update(self,request,pk=None):
         try:
@@ -178,7 +183,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
         
         return Response(status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny],url_name='bulk-create')
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny],url_path='bulk-create')
     @transaction.atomic
     def bulk_create(self, request):
         # parse request data
@@ -230,20 +235,12 @@ class UserResourceAspectScoreViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = UserResourceAspectScore.objects.all()
-        user_id = self.request.query_params.get('user_id')
-        resource_id = self.request.query_params.get('resource_id')
-        aspect_id = self.request.query_params.get('aspect_id')
-        if user_id:
-            queryset = queryset.filter(user_id=user_id)
+        user_resource = self.request.query_params.get('user_resource')
+
+        if user_resource:
+            queryset = queryset.filter(user_resource=user_resource)
             if not queryset.exists():
-                raise NotFound(detail="No UserScores found for the given user ID.")
-        if resource_id:
-            queryset = queryset.filter(resource_id=resource_id)
-            if not queryset.exists():
-                raise NotFound(detail="No UserScores found for the given resource ID.")
-        if aspect_id:
-            queryset = queryset.filter(aspect_id=aspect_id)
-            if not queryset.exists():
-                raise NotFound(detail="No UserScores found for the given aspect ID.")
+                raise NotFound(detail="No UserResourceAspectScores found for the given userResource ID.")
+
         return queryset
 

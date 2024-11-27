@@ -17,7 +17,6 @@ const ActivityCard = ({ activity, onClick }: Props) => {
     <Card
       sx={{
         boxShadow: '0 3px 5px rgba(0,0,0,0.2)', // Add some shadow for depth
-        marginBottom: 3, // Space below the card
       }}
     >
       <CardContent>

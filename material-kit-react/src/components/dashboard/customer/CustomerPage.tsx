@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { baseURL } from '@/config';
+import { backendURL } from '@/config';
 import { User } from '@/types/user';
 import { UseApiResources } from '@/hooks/UseApiResource';
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
@@ -13,7 +13,7 @@ const CustomerPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
-    endPoint: `${baseURL}/rate/users/`,
+    endPoint: `${backendURL}/rate/users/`,
     queryKey: ['usersall'],
     accessToken,
   });

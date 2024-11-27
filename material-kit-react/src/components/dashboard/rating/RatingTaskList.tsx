@@ -19,7 +19,7 @@ import { paths } from '@/paths';
 import { useUser } from '@/hooks/use-user';
 import { UseApiResources } from '@/hooks/UseApiResource';
 import { Resource } from '../assignments/ActivityDetails';
-import { baseURL } from '@/config';
+import { backendURL } from '@/config';
 
 interface UserResourceFull {
   id: number;
@@ -32,8 +32,8 @@ const RatingTaskList = () => {
   const { user } = useUser();
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: useFetchUserResources } = UseApiResources<UserResourceFull>({
-    endPoint:`${baseURL}/rate/user-resource/`,
-    queryKey: ['UserResource'],
+    endPoint:`${backendURL}/rate/user-resource/`,
+    queryKey: ['UserResource',event_id.toString(),user?.id.toString()||''],
     accessToken,
   });
   const { data: userResources } = useFetchUserResources({ event_id: event_id, user_id: user?.id });
@@ -64,7 +64,7 @@ const RatingTaskList = () => {
                       variant="outlined"
                       color="primary"
                       onClick={() => {
-                        router.push(paths.dashboard.rating.tasks +'/' + event_id + '/' + userResource.id);
+                        router.push(paths.dashboard.rating.tasks +'/' + event_id + '/resource/' + userResource.id);
                       }}
                     >
                       点评
@@ -72,7 +72,7 @@ const RatingTaskList = () => {
                     <Button
                       variant="outlined"
                       color="secondary"
-                      href={`${baseURL}/${userResource.resource.resource_file}/`} 
+                      href={`${backendURL}/${userResource.resource.resource_file}/`} 
                       download
                       style={{ marginLeft: '10px' }}
                     >

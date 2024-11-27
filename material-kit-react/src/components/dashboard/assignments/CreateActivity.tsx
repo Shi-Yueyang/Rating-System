@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { baseURL } from '@/config';
+import { backendURL } from '@/config';
 import { paths } from '@/paths';
 import { ActivityWithAspect, Aspect, UseApiResources } from '@/hooks/UseApiResource';
 import { useQueryClient } from '@tanstack/react-query';
@@ -57,7 +57,7 @@ const CreateActivity = () => {
   const queryClient = useQueryClient();
 
   const { useMutateResources: useMutateActivityWithAspect } = UseApiResources<ActivityWithAspect>({
-    endPoint: `${baseURL}/rate/events/`,
+    endPoint: `${backendURL}/rate/events/`,
     queryKey: ['events'],
     accessToken: accessToken,
   });
