@@ -7,8 +7,8 @@ export interface Config {
 }
 
 export const config: Config = {
-  site: { name: 'Devias Kit', description: '', themeColor: '#090a0b', url: getSiteURL() },
+  site: { name: 'Rating System', description: '', themeColor: '#090a0b', url: getSiteURL() },
   logLevel: (process.env.NEXT_PUBLIC_LOG_LEVEL as keyof typeof LogLevel) ?? LogLevel.ALL,
 };
 
-export const baseURL = "http://127.0.0.1:8000";
+export const backendURL = "http://127.0.0.1:8000";

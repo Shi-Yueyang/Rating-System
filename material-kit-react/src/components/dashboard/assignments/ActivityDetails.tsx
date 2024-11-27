@@ -6,7 +6,7 @@ import { Box, Button, Card, CardContent, CardHeader, Grid } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query';
 
 import { User } from '@/types/user';
-import { baseURL } from '@/config';
+import { backendURL } from '@/config';
 import { paths } from '@/paths';
 import { Activity, Aspect, UseApiResources } from '@/hooks/UseApiResource';
 
@@ -52,37 +52,37 @@ const ActivityDetails = () => {
 
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchSingleResource: useFetchSingleActivity, useMutateResources:useMutateActivity } = UseApiResources<Activity>({
-    endPoint: `${baseURL}/rate/events/`+event_id+'/',
+    endPoint: `${backendURL}/rate/events/`+event_id+'/',
     queryKey: ['events', event_id.toString()],
     accessToken,
   });
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
-    endPoint: `${baseURL}/rate/users/`,
+    endPoint: `${backendURL}/rate/users/`,
     queryKey: ['users'],
     accessToken,
   });
 
   const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
-    endPoint: `${baseURL}/rate/user-resource/`,
+    endPoint: `${backendURL}/rate/user-resource/`,
     queryKey: ['user_resources', event_id.toString()],
     accessToken,
   });
   const { useMutateResources: useMutateUserResources } = UseApiResources<UserResource>({
-    endPoint: `${baseURL}/rate/user-resource/bulk-create/`,
+    endPoint: `${backendURL}/rate/user-resource/bulk-create/`,
     accessToken,
     queryKey: ['null'],
     contentType: 'multipart/form-data',
   });
 
   const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
-    endPoint: `${baseURL}/rate/aspects/`,
+    endPoint: `${backendURL}/rate/aspects/`,
     queryKey: ['aspects', event_id.toString()],
     accessToken,
   });
 
   const {useMutateResources:useMutateAspects} = UseApiResources<Aspect>({
-    endPoint: `${baseURL}/rate/aspects/batch-update/`,
+    endPoint: `${backendURL}/rate/aspects/batch-update/`,
     queryKey: ['aspects', event_id.toString()],
     accessToken,
   });
@@ -91,7 +91,7 @@ const ActivityDetails = () => {
   const {mutate:mutateAspect} = useMutateAspects('PATCH')
   const {mutate:mutateActivity}=useMutateActivity('PATCH');
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
-    endPoint: `${baseURL}/rate/resources/`,
+    endPoint: `${backendURL}/rate/resources/`,
     queryKey: ['resources', event_id.toString()],
     accessToken,
   });
