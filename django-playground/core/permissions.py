@@ -17,7 +17,7 @@ class IsAdminOrExpert(BasePermission):
             return False
         if request.user.is_staff or request.user.is_superuser:
             return True
-        if request.user.groups.filter(name='expert').exists():
+        if request.user.groups.filter(name='Expert').exists():
             if request.method in SAFE_METHODS or request.method == 'PATCH':
                 return True
         return False
