@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser,IsAuthenticated, AllowAny
 from django.db import transaction
 from django.contrib.auth.models import Group
-from core.permissions import IsAdminOrOrganizer
+from core.permissions import IsAdminOrOrganizer,IsAdminOrExpert
 from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer, UserResourceAspectScoreSerializer
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -29,9 +29,6 @@ class EventViewSet(viewsets.ModelViewSet):
                 raise NotFound(detail='User not found')    
         return queryset.distinct()
 
-        permission_classes = [IsAdminOrOrganizer]
-
-
     @transaction.atomic
     def create(self, request):
         serializer = EventSerializer(data=request.data)
@@ -42,7 +39,7 @@ class EventViewSet(viewsets.ModelViewSet):
 
 class ResourceViewSet(viewsets.ModelViewSet):
     serializer_class = ResourceSerializer
-    
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
         event_id = self.request.query_params.get('event_id')
@@ -66,6 +63,11 @@ class AspectViewSet(viewsets.ModelViewSet):
     queryset = Aspect.objects.all()
     serializer_class = AspectSerializer
 
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy','batch_update']:
+            return [IsAdminOrOrganizer()]
+        return [IsAuthenticated()]
+    
     def get_queryset(self):
         event_id = self.request.query_params.get('event_id')
         if event_id:
@@ -136,6 +138,12 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             return UserResourceReadSerializer(*args, **kwargs)
         return UserResourceSerializer(*args, **kwargs)
     
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy','bulk_create']:
+            return [IsAdminOrOrganizer()]
+        return [IsAdminOrExpert()]
+    
+    
     def get_queryset(self):
         queryset = UserResource.objects.all()
         event_id = self.request.query_params.get('event_id')
@@ -205,6 +213,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
                 if len(user_resource_pairs) <= index:
                     user_resource_pairs.append({})
                 user_resource_pairs[index][field] = value
+                
         # create new resources
         for resource in new__resources:
             resource_file = resource.get('resourceFile')
@@ -212,6 +221,7 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             resource_name = resource.get('resourceName')
             event = Event.objects.get(pk=event_id)
             Resource.objects.create(event=event, resource_name=resource_name, resource_file=resource_file)
+            
         # update old resources
         for resource in old_resources:
             resource_id = resource.get('resource')
@@ -220,12 +230,14 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             resource.resource_name = resource_name
             resource.save()
         
+        print('debug3',user_resource_pairs)
         for pair in user_resource_pairs:
             resource_name = pair.get('resourceName')
-            user_id = pair.get('user')
+            user_id = int(pair.get('user'))
             user = User.objects.get(pk=user_id)
             resource = Resource.objects.get(resource_name=resource_name)
             UserResource.objects.get_or_create(user=user, resource=resource)
+        print('deubg4')
 
         return Response(status=status.HTTP_200_OK)
         
