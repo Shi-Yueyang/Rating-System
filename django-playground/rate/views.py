@@ -195,47 +195,58 @@ class UserResourceViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def bulk_create(self, request):
         # parse request data
-        new__resources = []
+        new_resources = []
         old_resources = []
         user_resource_pairs = []
+
         for key, value in request.data.items():
             operation,index,field = key.split('_')
             index = int(index)
-            if operation == 'newResourcefile':
-                if len(new__resources) <= index:
-                    new__resources.append({})
-                new__resources[index][field] = value
+            if operation == 'newResource':
+                while len(new_resources) <= index:
+                    new_resources.append({})
+                new_resources[index][field] = value
             elif operation == 'oldResource':
-                if len(old_resources) <= index:
+                while len(old_resources) <= index:
                     old_resources.append({})
                 old_resources[index][field] = value
             elif operation == 'userResourcePairs':
-                if len(user_resource_pairs) <= index:
+                while len(user_resource_pairs) <= index:
                     user_resource_pairs.append({})
                 user_resource_pairs[index][field] = value
                 
         # create new resources
-        for resource in new__resources:
+        print('debug1',new_resources)
+        for resource in new_resources:
+            if not resource:
+                continue
             resource_file = resource.get('resourceFile')
             event_id = resource.get('event')
             resource_name = resource.get('resourceName')
             event = Event.objects.get(pk=event_id)
-            Resource.objects.create(event=event, resource_name=resource_name, resource_file=resource_file)
+            resource = Resource.objects.create(event=event, resource_name=resource_name, resource_file=resource_file)
+            print(resource.resource_name)
             
         # update old resources
         for resource in old_resources:
+            if not resource:
+                continue
             resource_id = resource.get('resource')
             resource_name = resource.get('resourceName')
             resource = Resource.objects.get(pk=resource_id)
             resource.resource_name = resource_name
             resource.save()
         
-        print('debug3',user_resource_pairs)
         for pair in user_resource_pairs:
+            if not pair:
+                continue
+            # print('debug3',pair)
             resource_name = pair.get('resourceName')
-            user_id = int(pair.get('user'))
+            user_id = pair.get('user')
             user = User.objects.get(pk=user_id)
+            # print(user)
             resource = Resource.objects.get(resource_name=resource_name)
+            # print(resource.resource_name)
             UserResource.objects.get_or_create(user=user, resource=resource)
         print('deubg4')
 
