@@ -8,8 +8,8 @@ import { paths } from '@/paths';
 import { useUser } from '@/hooks/use-user';
 import { Activity, UseApiResources } from '@/hooks/UseApiResource';
 
-import ActivityCard from '../assignments/ActivityCard';
 import { backendURL } from '@/config';
+import RatingCard from './RatingCard';
 
 const RatingPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
@@ -29,12 +29,12 @@ const RatingPage = () => {
       <Grid container spacing={3} >
         {activities?.map((activity) => (
           <Grid key={activity.id} lg={4} md={6} xs={12} padding={2}>
-            <ActivityCard
+            <RatingCard
               activity={activity}
-              onClick={() => {
+              handleClickView={() => {
                 router.push(paths.dashboard.rating.tasks+'/' + activity.id);
               }}
-            ></ActivityCard>
+            ></RatingCard>
           </Grid>
         ))}
       </Grid>

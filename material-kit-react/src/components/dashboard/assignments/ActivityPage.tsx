@@ -30,8 +30,11 @@ const ActivityPage = () => {
           <Grid key={activity.id} lg={4} md={6} xs={12}>
             <ActivityCard
               activity={activity}
-              onClick={() => {
+              onClickEdit={() => {
                 router.push(paths.dashboard.assignment.details+'/' + activity.id);
+              }}
+              onClickView={()=>{
+                router.push(paths.dashboard.assignment.results+'/' + activity.id);
               }}
             ></ActivityCard>
           </Grid>
