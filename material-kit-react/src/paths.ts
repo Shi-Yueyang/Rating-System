@@ -14,6 +14,7 @@ export const paths = {
       base: '/dashboard/assignment',
       create: '/dashboard/assignment/create',
       details: '/dashboard/assignment/details',
+      results:'/dashboard/assignment/results',
     },
     rating: {
       base: '/dashboard/rating',

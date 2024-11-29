@@ -216,7 +216,6 @@ class UserResourceViewSet(viewsets.ModelViewSet):
                 user_resource_pairs[index][field] = value
                 
         # create new resources
-        print('debug1',new_resources)
         for resource in new_resources:
             if not resource:
                 continue
@@ -225,7 +224,6 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             resource_name = resource.get('resourceName')
             event = Event.objects.get(pk=event_id)
             resource = Resource.objects.create(event=event, resource_name=resource_name, resource_file=resource_file)
-            print(resource.resource_name)
             
         # update old resources
         for resource in old_resources:
@@ -248,7 +246,6 @@ class UserResourceViewSet(viewsets.ModelViewSet):
             resource = Resource.objects.get(resource_name=resource_name)
             # print(resource.resource_name)
             UserResource.objects.get_or_create(user=user, resource=resource)
-        print('deubg4')
 
         return Response(status=status.HTTP_200_OK)
         
@@ -259,11 +256,17 @@ class UserResourceAspectScoreViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = UserResourceAspectScore.objects.all()
         user_resource = self.request.query_params.get('user_resource')
-
+        event = self.request.query_params.get('event_id')
+        
         if user_resource:
             queryset = queryset.filter(user_resource=user_resource)
             if not queryset.exists():
                 raise NotFound(detail="No UserResourceAspectScores found for the given userResource ID.")
 
+        if event:
+            queryset = queryset.filter(user_resource__resource__event=event)
+            if not queryset.exists():
+                raise NotFound(detail="No UserResourceAspectScores found for the given Event ID.")
+        
         return queryset
 

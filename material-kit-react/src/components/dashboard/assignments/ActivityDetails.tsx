@@ -37,7 +37,7 @@ export interface AssignmentFile {
   users: User[];
 }
 
-interface UserResource {
+export interface UserResource {
   id: number;
   user: number;
   resource: Resource;

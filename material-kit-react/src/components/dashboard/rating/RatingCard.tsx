@@ -7,11 +7,10 @@ import { Activity } from '@/hooks/UseApiResource';
 
 interface Props {
   activity: Activity;
-  onClickEdit: () => void;
-  onClickView:()=>void;
+  handleClickView: () => void;
 }
 
-const ActivityCard = ({ activity, onClickEdit: onClickEdit , onClickView:onClickView}: Props) => {
+const RatingCard = ({ activity, handleClickView: handleClickView }: Props) => {
   const router = useRouter();
 
   return (
@@ -31,15 +30,13 @@ const ActivityCard = ({ activity, onClickEdit: onClickEdit , onClickView:onClick
       <Divider />
       
       <CardActions>
-        <Button variant="outlined" color="primary" onClick={onClickEdit}>
-          编辑活动
+        <Button variant="outlined" color="primary" onClick={handleClickView}>
+          开始打分
         </Button>
-        <Button variant="outlined" color="primary" onClick={onClickView}>
-          查看结果
-        </Button>
+
       </CardActions>
     </Card>
   );
 };
 
-export default ActivityCard;
+export default RatingCard;
