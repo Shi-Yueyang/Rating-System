@@ -13,16 +13,16 @@ const mockWorks = [
         id: 1,
         name: "Reviewer 1",
         aspectScores: [
-          { aspect: "Creativity", score: 8 },
-          { aspect: "Technicality", score: 9 },
+          { id: 1, user_resource: 1, aspect: "Creativity", score: 8 },
+          { id: 2, user_resource: 2, aspect: "Technicality", score: 9 },
         ],
       },
       {
         id: 2,
         name: "Reviewer 2",
         aspectScores: [
-          { aspect: "Creativity", score: 7 },
-          { aspect: "Technicality", score: 8 },
+          { id: 3, user_resource: 1, aspect: "Creativity", score: 7 },
+          { id: 4, user_resource:2, aspect: "Technicality", score: 8 },
         ],
       },
     ],
@@ -35,8 +35,8 @@ const mockWorks = [
         id: 3,
         name: "Reviewer 3",
         aspectScores: [
-          { aspect: "Creativity", score: 9 },
-          { aspect: "Technicality", score: 10 },
+          { id: 5, user_resource: 1, aspect: "Creativity", score: 9 },
+          { id: 6, user_resource: 2, aspect: "Technicality", score: 10 },
         ],
       },
     ],
