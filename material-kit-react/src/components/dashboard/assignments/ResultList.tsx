@@ -1,29 +1,34 @@
 'use client';
-import React from "react";
+
+import React from 'react';
+import { useParams } from 'next/navigation';
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
   Card,
   CardContent,
   CardHeader,
   Grid,
-  Typography,
-  Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-} from "@mui/material";
-import { CaretDown, ListBullets, Star } from "@phosphor-icons/react";
-import { backendURL } from "@/config";
-import { UseApiResources } from "@/hooks/UseApiResource";
-import { Resource, UserResource } from "./ActivityDetails";
-import { useParams } from "next/navigation";
+  Typography,
+} from '@mui/material';
+import { CaretDown, ListBullets, Star } from '@phosphor-icons/react';
+
+import { backendURL } from '@/config';
+import { UseApiResources } from '@/hooks/UseApiResource';
+
+import { Resource, UserResource } from './ActivityDetails';
 
 interface AspectScore {
+  id: number;
+  user_resource: number;
   aspect: string;
   score: number;
 }
@@ -53,25 +58,53 @@ const ScoreList: React.FC<Props> = ({ works }) => {
     queryKey: ['user_resources', event_id.toString()],
     accessToken,
   });
-  
+
   const { useFetchResources: fetchAspectsScores } = UseApiResources<AspectScore>({
     endPoint: `${backendURL}/rate/user-resource-aspect-score/`,
-    queryKey: ['user-resource-aspect-score',event_id.toString()],
+    queryKey: ['user-resource-aspect-score', event_id.toString()],
     accessToken,
   });
 
-  const {data:userResources} = fetchUserResource({event_id:event_id})
-  const {data:userAspectScores} = fetchAspectsScores({event_id:event_id})
-  const resources:Resource[] = Array.from(
-    new Map(userResources?.map(userResource => [userResource.resource.id, userResource.resource])).values()
+  const { data: userResources } = fetchUserResource({ event_id: event_id });
+  const { data: userAspectScores } = fetchAspectsScores({ event_id: event_id });
+  //--------------------------------------------------------------------------------
+  const uniqueResources: Resource[] = Array.from(
+    new Map(userResources?.map((userResource) => [userResource.resource.id, userResource.resource])).values()
   );
-  console.log(resources)
+
+  const userResourceIdResourceIdMap = new Map(
+    userResources?.map((userResource) => [userResource.id, userResource.resource.id])
+  );
+  const UserResourceIdUserIdMap = new Map(
+    userResources?.map((userResource) => [userResource.id, userResource.user])
+  )
+
+  const tempWork = uniqueResources.map((resource) => {
+    const relatedAspectScore = userAspectScores?.filter(
+      (userAspectScore) => resource.id === userResourceIdResourceIdMap.get(userAspectScore.user_resource)
+    );
+    const relatedUsers = userResources
+      ?.filter((userResource) => resource.id === userResource.resource.id)
+      .map((userResource) => userResource.user);
+    const groupedAspectScores = relatedUsers?.map((user) => {
+      const aspectScores = relatedAspectScore?.filter((aspectScore) => UserResourceIdUserIdMap.get(aspectScore.user_resource) === user);
+      return {
+        user,
+        aspectScores,
+      };
+    })
+    return {
+      resource,
+      groupedAspectScores,
+    };
+  });
+
+  console.log(tempWork)
+  //--------------------------------------------------------------------------------
 
   const calculateTotalScore = (reviewers: Reviewer[]) =>
     reviewers.reduce(
-      (sum, reviewer) =>
-        sum +
-        reviewer.aspectScores.reduce((aspectSum, aspect) => aspectSum + aspect.score, 0),
+      (sum, reviewer) => sum + reviewer.aspectScores.reduce((aspectSum, aspect) => aspectSum + aspect.score, 0),
       0
     );
 
