@@ -95,8 +95,10 @@ class UserResourceSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class UserResourceAspectScoreSerializer(serializers.ModelSerializer):
+    aspect_name = serializers.SerializerMethodField()
     class Meta:
         model = UserResourceAspectScore
-        fields = ['id', 'user_resource','aspect','score']
-    
-    
+        fields = ['id', 'user_resource','aspect','aspect_name','score']
+
+    def get_aspect_name(self, obj):
+        return obj.aspect.name
