@@ -1,7 +1,4 @@
-'use client';
-
 import React from 'react';
-import { useParams } from 'next/navigation';
 import {
   Accordion,
   AccordionDetails,
@@ -21,28 +18,24 @@ import {
 } from '@mui/material';
 import { CaretDown, ListBullets, Star } from '@phosphor-icons/react';
 
-import { backendURL } from '@/config';
-import { UseApiResources } from '@/hooks/UseApiResource';
-
-import { Resource, UserResource } from './ActivityDetails';
-
-interface AspectScore {
+export interface AspectScore {
   id: number;
   user_resource: number;
-  aspect: string;
+  aspect: number;
+  aspect_name: string;
   score: number;
 }
 
-interface Reviewer {
+export interface ReviewerScore {
   id: number;
   name: string;
   aspectScores: AspectScore[];
 }
 
-interface Work {
+export interface Work {
   id: number;
   title: string;
-  reviewers: Reviewer[];
+  reviewerScores: ReviewerScore[];
 }
 
 interface Props {
@@ -50,63 +43,18 @@ interface Props {
 }
 
 const ScoreList: React.FC<Props> = ({ works }) => {
-  const { id: event_id } = useParams();
-  const accessToken = localStorage.getItem('custom-auth-token');
+  const calculateAverageScoreOfOneReviewer = (aspectScores: AspectScore[]) => {
+    if (aspectScores.length === 0) return 0;
+    const sum = aspectScores.reduce((sum, aspect) => sum + aspect.score, 0);
+    return sum / aspectScores.length;
+  };
 
-  const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
-    endPoint: `${backendURL}/rate/user-resource/`,
-    queryKey: ['user_resources', event_id.toString()],
-    accessToken,
-  });
-
-  const { useFetchResources: fetchAspectsScores } = UseApiResources<AspectScore>({
-    endPoint: `${backendURL}/rate/user-resource-aspect-score/`,
-    queryKey: ['user-resource-aspect-score', event_id.toString()],
-    accessToken,
-  });
-
-  const { data: userResources } = fetchUserResource({ event_id: event_id });
-  const { data: userAspectScores } = fetchAspectsScores({ event_id: event_id });
-  //--------------------------------------------------------------------------------
-  const uniqueResources: Resource[] = Array.from(
-    new Map(userResources?.map((userResource) => [userResource.resource.id, userResource.resource])).values()
-  );
-
-  const userResourceIdResourceIdMap = new Map(
-    userResources?.map((userResource) => [userResource.id, userResource.resource.id])
-  );
-  const UserResourceIdUserIdMap = new Map(
-    userResources?.map((userResource) => [userResource.id, userResource.user])
-  )
-
-  const tempWork = uniqueResources.map((resource) => {
-    const relatedAspectScore = userAspectScores?.filter(
-      (userAspectScore) => resource.id === userResourceIdResourceIdMap.get(userAspectScore.user_resource)
-    );
-    const relatedUsers = userResources
-      ?.filter((userResource) => resource.id === userResource.resource.id)
-      .map((userResource) => userResource.user);
-    const groupedAspectScores = relatedUsers?.map((user) => {
-      const aspectScores = relatedAspectScore?.filter((aspectScore) => UserResourceIdUserIdMap.get(aspectScore.user_resource) === user);
-      return {
-        user,
-        aspectScores,
-      };
-    })
-    return {
-      resource,
-      groupedAspectScores,
-    };
-  });
-
-  console.log(tempWork)
-  //--------------------------------------------------------------------------------
-
-  const calculateTotalScore = (reviewers: Reviewer[]) =>
-    reviewers.reduce(
-      (sum, reviewer) => sum + reviewer.aspectScores.reduce((aspectSum, aspect) => aspectSum + aspect.score, 0),
-      0
-    );
+  const calculateTotalAverageScore = (reviewers: ReviewerScore[]) => {
+    const nomberOfValidReviewers = reviewers.filter((reviewer) => reviewer.aspectScores.length > 0).length;
+    if (nomberOfValidReviewers === 0) return 0;
+    const sum = reviewers.reduce((sum, reviewer) => sum + calculateAverageScoreOfOneReviewer(reviewer.aspectScores), 0);
+    return sum / nomberOfValidReviewers;
+  };
 
   return (
     <Grid container spacing={3}>
@@ -117,13 +65,13 @@ const ScoreList: React.FC<Props> = ({ works }) => {
               title={
                 <Box display="flex" alignItems="center" gap={1}>
                   <ListBullets size={24} weight="bold" />
-                  <Typography variant="h6">{work.title}</Typography>
+                  <Typography variant="h6">作评: {work.title}</Typography>
                 </Box>
               }
               subheader={
                 <Box display="flex" alignItems="center" gap={1}>
                   <Star size={20} color="#ffb400" />
-                  <Typography>Total Score: {calculateTotalScore(work.reviewers)}</Typography>
+                  <Typography>总分: {calculateTotalAverageScore(work.reviewerScores).toFixed(2)}</Typography>
                 </Box>
               }
             />
@@ -131,40 +79,47 @@ const ScoreList: React.FC<Props> = ({ works }) => {
               <Accordion>
                 <AccordionSummary expandIcon={<CaretDown size={20} />}>
                   <Typography variant="subtitle1">
-                    <ListBullets size={20} /> View Reviewers
+                    <ListBullets size={20} /> 查看专家评分
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                  {work.reviewers.map((reviewer) => (
+                  {work.reviewerScores.map((reviewer) => (
                     <Box key={reviewer.id} mb={2}>
-                      <Typography variant="h6">{reviewer.name}</Typography>
-                      <Accordion>
-                        <AccordionSummary expandIcon={<CaretDown size={20} />}>
-                          <Typography>
-                            <ListBullets size={16} /> View Aspect Scores
-                          </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <TableContainer>
-                            <Table>
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>Aspect</TableCell>
-                                  <TableCell>Score</TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {reviewer.aspectScores.map((aspect, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell>{aspect.aspect}</TableCell>
-                                    <TableCell>{aspect.score}</TableCell>
+                      <Typography variant="h6">
+                        {reviewer.name}:{' '}
+                        {reviewer.aspectScores.length > 0
+                          ? calculateAverageScoreOfOneReviewer(reviewer.aspectScores).toFixed(2)
+                          : '未评分'}
+                      </Typography>
+                      {reviewer.aspectScores.length > 0 && (
+                        <Accordion>
+                          <AccordionSummary expandIcon={<CaretDown size={20} />}>
+                            <Typography>
+                              <ListBullets size={16} /> 查看小分
+                            </Typography>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            <TableContainer>
+                              <Table>
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>标准</TableCell>
+                                    <TableCell>分数</TableCell>
                                   </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        </AccordionDetails>
-                      </Accordion>
+                                </TableHead>
+                                <TableBody>
+                                  {reviewer.aspectScores.map((aspectScore, index) => (
+                                    <TableRow key={index}>
+                                      <TableCell>{aspectScore.aspect_name}</TableCell>
+                                      <TableCell>{aspectScore.score}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </AccordionDetails>
+                        </Accordion>
+                      )}
                     </Box>
                   ))}
                 </AccordionDetails>
