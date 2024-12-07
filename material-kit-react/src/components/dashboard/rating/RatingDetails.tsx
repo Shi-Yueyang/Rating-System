@@ -8,13 +8,9 @@ import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
 import { paths } from '@/paths';
 import { useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@/hooks/use-user';
+import { UserResource } from '../assignments/ActivityDetails';
 
-interface UserResource {
-  id: number;
-  user: number;
-  resource: number;
-  score: number;
-}
+
 
 interface AspectScore {
   aspect: number;
