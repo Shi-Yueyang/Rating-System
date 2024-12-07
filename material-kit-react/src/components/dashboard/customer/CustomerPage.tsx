@@ -8,17 +8,24 @@ import { User } from '@/types/user';
 import { UseApiResources } from '@/hooks/UseApiResource';
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 import { CustomersTable } from '@/components/dashboard/customer/customers-table';
+import { UserResource } from '../assignments/ActivityDetails';
 
 const CustomerPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
 
   const { useFetchResources: fetchUsers } = UseApiResources<User>({
     endPoint: `${backendURL}/rate/users/`,
-    queryKey: ['usersall'],
+    queryKey: ['users'],
+    accessToken,
+  });
+  const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
+    endPoint: `${backendURL}/rate/user-resource/`,
+    queryKey: ['user_resources'],
     accessToken,
   });
 
   const { data: users } = fetchUsers();
+  const {data: userResources} = fetchUserResource();
   const page = 0;
   const rowsPerPage = 5;
 
@@ -48,7 +55,8 @@ const CustomerPage = () => {
       <CustomersTable
         count={paginatedCustomers.length}
         page={page}
-        rows={paginatedCustomers}
+        users={paginatedCustomers}
+        userResources = {userResources}
         rowsPerPage={rowsPerPage}
       />
     </div>
