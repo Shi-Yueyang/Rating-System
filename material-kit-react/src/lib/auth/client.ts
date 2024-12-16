@@ -107,7 +107,7 @@ class AuthClient {
       console.log('[signInWithPassword] token: '+token);
       return {};
     } catch (error){
-      return {error:'invalid credentials'}
+      return {error:'用户名或密码错误'}
     }
   }
 

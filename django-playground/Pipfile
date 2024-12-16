@@ -10,6 +10,8 @@ django-cors-headers = "*"
 djangorestframework-simplejwt = "*"
 pillow = "*"
 django-debug-toolbar = "*"
+mysqlclient = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
