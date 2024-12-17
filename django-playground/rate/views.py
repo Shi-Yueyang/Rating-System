@@ -9,6 +9,7 @@ from django.db import transaction
 from django.contrib.auth.models import Group
 from core.permissions import IsAdminOrOrganizer,IsAdminOrExpert
 from .serializers import EventSerializer, ResourceSerializer, AspectSerializer, UserSerializer,UserReadSerializer, UserResourceSerializer, UserResourceReadSerializer, UserResourceAspectScoreSerializer
+from django.db import transaction
 
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
@@ -115,15 +116,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
     # Add to Expert group by default
     def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        user = User.objects.get(id=response.data['id'])
         group_name = 'Expert'
+
         try:
             group = Group.objects.get(name=group_name)
-            user.groups.add(group)
         except Group.DoesNotExist:
             return Response({'error': 'Group does not exist'}, status=400)
-
+        
+        response = super().create(request, *args, **kwargs)
+        user = User.objects.get(id=response.data['id'])
+        user.groups.add(group)
         return response
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])

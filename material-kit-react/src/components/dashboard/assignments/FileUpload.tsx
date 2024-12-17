@@ -21,8 +21,8 @@ export interface FileUploadProps  {
             height?: string
         }
     }
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    onDrop: (event: React.DragEvent<HTMLElement>) => void
+    onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+    onDrop?: (event: React.DragEvent<HTMLElement>) => void
 }
 
 const useStyle = makeStyles({
@@ -114,7 +114,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             if (imageButton && e.dataTransfer.files[0]) {
                 setImageUrl(URL.createObjectURL(e.dataTransfer.files[0]))
             }
-            onDrop(e)
+            onDrop && onDrop(e)
         },
     }
 
@@ -122,8 +122,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         if (imageButton && event.target.files) {
             setImageUrl(URL.createObjectURL(event.target.files[0]))
         }
-
-        onChange(event)
+    
+        if (onChange) {
+            onChange(event)
+        }
     }
 
     return (

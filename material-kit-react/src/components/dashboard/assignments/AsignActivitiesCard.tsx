@@ -6,7 +6,7 @@ import { User } from '@/types/user';
 import { AssignmentFile, isNotResource, Resource } from './ActivityDetails';
 import MultiSelect from './MultiSelect';
 
-interface Props {
+interface AsignActivitiesCardProps {
   assignments: AssignmentFile[];
   users: User[];
   handleFileNameChange: (index: number, fileName: string) => void;
@@ -20,7 +20,7 @@ const AsignActivitiesCard = ({
   handleFileNameChange,
   handleFileDelete,
   handleUserChange,
-}: Props) => {
+}: AsignActivitiesCardProps) => {
   return (
     <Card
       sx={{

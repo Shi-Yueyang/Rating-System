@@ -69,7 +69,6 @@ const CreateActivity = () => {
 
     usePostActivityWithAspect.mutate(activityWithAspect, {
       onError: (error: AxiosError) => {
-        console.log('[CreateAssignment onSubmit onError]', error);
         if (!error.response || !error.response.data) {
           return;
         }
@@ -116,7 +115,7 @@ const CreateActivity = () => {
                       try {
                         field.onChange(dayjs(date).format('YYYY-MM-DD'));
                       } catch (error) {
-                        console.log('[CreateAssignment] date error' + error);
+                        console.error('[CreateAssignment] date error' + error);
                       }
                     }}
                   />

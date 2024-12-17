@@ -21,7 +21,7 @@ import {User} from '@/types/user';
 import { UseApiResources } from '@/hooks/UseApiResource';
 
 
-interface Props {
+interface AccountDetailsFormProps {
   avatarFile: File | null;
 }
 const userSchema = z.object({
@@ -30,7 +30,7 @@ const userSchema = z.object({
   realname: z.string(),
 });
 
-export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
+export function AccountDetailsForm({ avatarFile }: AccountDetailsFormProps): React.JSX.Element {
 
   // hooks
   const { user } = useUser();
@@ -82,7 +82,7 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
         <CardContent>
           <Grid container spacing={3}>
             <Grid md={6} xs={12}>
-              <FormControl fullWidth required error={!!errors.username}>
+              <FormControl fullWidth required error={Boolean(errors.username)}>
                 <InputLabel>用户名</InputLabel>
                 <Controller
                   name="username"
@@ -96,7 +96,7 @@ export function AccountDetailsForm({ avatarFile }: Props): React.JSX.Element {
             </Grid>
 
             <Grid md={6} xs={12}>
-              <FormControl fullWidth required error={!!errors.email}>
+              <FormControl fullWidth required error={Boolean(errors.email)}>
                 <InputLabel>邮箱地址</InputLabel>
                 <Controller
                   name="email"

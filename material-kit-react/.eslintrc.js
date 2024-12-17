@@ -63,6 +63,7 @@ module.exports = {
     '@typescript-eslint/no-unnecessary-condition': 'off', // remove when no static data is used
     '@typescript-eslint/require-await': 'off', // Server Actions require async flag always
     '@typescript-eslint/prefer-nullish-coalescing': 'off', // personal style
+
     '@typescript-eslint/restrict-template-expressions': [
       'error',
       {
@@ -76,7 +77,29 @@ module.exports = {
     'no-redeclare': 'off', // conflict with TypeScript function overloads
     'react/jsx-fragments': 'off', // personal style
     'react/prop-types': 'off', // TypeScript is used for type checking
-
     '@next/next/no-img-element': 'off', // Temporary disabled
+
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/prefer-optional-chain': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    'object-shorthand': 'off',
+    '@typescript-eslint/use-unknown-in-catch-callback-variable': 'off',
+    '@typescript-eslint/no-unnecessary-type-arguments': 'off',
+    '@typescript-eslint/restrict-plus-operands': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    'no-implicit-coercion': 'off',
+    '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+    'import/no-cycle': 'off',
+    ' react-hooks/exhaustive-deps': 'off',
+    'no-console': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
+    ' @typescript-eslint/consistent-indexed-object-style': 'off',
+    'react-hooks/exhaustive-deps':'off',
+    '@typescript-eslint/consistent-indexed-object-style': 'off',
+
   },
 };

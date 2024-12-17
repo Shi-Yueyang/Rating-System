@@ -65,13 +65,13 @@ const Page = () => {
           ?.filter((userResource) => resource.id === userResource.resource.id)
           .map((userResource) => userResource.user) || [];
 
-      const reviewerScores: ReviewerScore[] = relatedUsers?.map((userId, id) => {
+      const reviewerScores: ReviewerScore[] = relatedUsers?.map((userId, reviewerId) => {
         const aspectScores =
           relatedAspectScore?.filter(
             (aspectScore) => UserResourceIdUserIdMap.get(aspectScore.user_resource) === userId
           ) ?? [];
         return {
-          id,
+          id: reviewerId,
           name: userIdUserObjectMap.get(userId)?.username ?? '',
           aspectScores,
         };

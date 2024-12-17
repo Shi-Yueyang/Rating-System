@@ -1,5 +1,4 @@
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { Button, Card, CardActions, CardContent, Divider, Typography } from '@mui/material';
 
 import { Activity } from '@/hooks/UseApiResource';

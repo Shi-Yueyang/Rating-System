@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Box, Button, Card, CardContent, CardHeader, Grid } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
-
 import { User } from '@/types/user';
 import { backendURL } from '@/config';
 import { paths } from '@/paths';
@@ -28,7 +27,7 @@ interface NewResource {
   event: number;
 }
 
-export const isNotResource = (resource: any): resource is NewResource => {
+export const isNotResource = (resource: Resource|NewResource): resource is NewResource => {
   return (resource as Resource).id === undefined;
 };
 
@@ -52,7 +51,7 @@ const ActivityDetails = () => {
 
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchSingleResource: useFetchSingleActivity, useMutateResources:useMutateActivity } = UseApiResources<Activity>({
-    endPoint: `${backendURL}/rate/events/`+eventId+'/',
+    endPoint: `${backendURL}/rate/events/`+ eventId.toString() + '/',
     queryKey: ['events', eventId.toString()],
     accessToken,
   });
@@ -233,13 +232,11 @@ const ActivityDetails = () => {
           resource_name: '',
           event: parseInt(eventId as string),
         };
-        const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ resource, users: [] as User[] }));
+        const newAssignments: AssignmentFile[] = Array.from(files).map(() => ({ resource, users: [] as User[] }));
         setAssignments((prev) => [...prev, ...newAssignments]);
       }
     },
-    onDrop: (event: React.DragEvent<HTMLElement>) => {
-      console.log(`Drop ${event.dataTransfer.files[0].name}`);
-    },
+
   };
 
   return (

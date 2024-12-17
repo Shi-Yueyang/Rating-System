@@ -26,9 +26,7 @@ const schema = zod.object({
   emailOrUsername: zod.string()
     .min(1, { message: 'Email or username is required' })
     .refine(value => {
-      // Basic email validation regex
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      // Basic username validation: alphanumeric, underscores, hyphens, and periods
       const usernameRegex = /^[a-zA-Z0-9._-]+$/;
 
       // Return true if it matches either email or username format

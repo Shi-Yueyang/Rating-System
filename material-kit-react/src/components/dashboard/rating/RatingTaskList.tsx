@@ -37,7 +37,6 @@ const RatingTaskList = () => {
     accessToken,
   });
   const { data: userResources } = useFetchUserResources({ event_id: eventId, user_id: user?.id });
-  console.log(userResources);
   const router = useRouter();
   return (
     <Stack>

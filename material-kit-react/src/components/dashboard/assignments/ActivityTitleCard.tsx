@@ -3,12 +3,12 @@ import { Button, Card, CardActions, CardContent, CardHeader, Divider, Stack, Tex
 
 import { Activity } from '@/hooks/UseApiResource';
 
-interface Props {
+interface ActivityTitleCardProps {
   activity: Activity;
   handleActivityChange: (newActivity: Activity) => void;
 }
 
-const ActivityTitleCard = ({ activity, handleActivityChange }: Props) => {
+const ActivityTitleCard = ({ activity, handleActivityChange }: ActivityTitleCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedActivity, setEditedActivity] = useState(activity);
   const [initialActivity, setInitialActivity] = useState(activity);

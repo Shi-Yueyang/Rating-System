@@ -29,8 +29,9 @@ const schema = zod
     username: zod
       .string()
       .min(1, { message: '您需要提供用户名' })
-      .max(30, { message: '用户名最多30个字符' }) // Limit to 30 characters
+      .max(30, { message: '用户名最多30个字符' })
       .regex(/^[a-zA-Z0-9_]+$/, { message: '用户名只能包含字母、数字和下划线' }),
+    realname:zod.string().min(1, { message: '您需要提供真实姓名' }),
     email: zod.string().min(1, { message: '您需要提供邮箱' }).email(),
     password: zod.string().min(6, { message: '密码最少6个字符' }),
     rePassword: zod.string(),
@@ -48,6 +49,7 @@ const schema = zod
 
 interface FormInputs {
   username: string;
+  realname:string;
   email: string;
   password: string;
   rePassword: string;
@@ -74,8 +76,6 @@ export function SignUpForm(): React.JSX.Element {
   const onSubmit = React.useCallback(
     async (values: FormInputs): Promise<void> => {
       setIsPending(true);
-
-      // Include avatar file in the submission values
       const signUpValues = { ...values, avatar: avatarFile };
 
       const { error, fieldErrors } = await authClient.signUp(signUpValues);
@@ -99,11 +99,7 @@ export function SignUpForm(): React.JSX.Element {
         setIsPending(false);
         return;
       }
-      // Refresh the auth state
       await checkSession?.();
-
-      // UserProvider, for this case, will not refresh the router
-      // After refresh, GuestGuard will handle the redirect
       router.refresh();
     },
     [checkSession, router, setError]
@@ -147,8 +143,20 @@ export function SignUpForm(): React.JSX.Element {
             render={({ field }) => (
               <FormControl error={Boolean(errors.username)}>
                 <InputLabel>用户名</InputLabel>
-                <OutlinedInput {...field} label="First name" />
+                <OutlinedInput {...field} label="user name" />
                 {errors.username ? <FormHelperText>{errors.username.message}</FormHelperText> : null}
+              </FormControl>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name='realname'
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.realname)}>
+                <InputLabel>真实姓名</InputLabel>
+                <OutlinedInput {...field} label="Real Name" autoComplete='real name' />
+                {errors.realname ? <FormHelperText>{errors.realname.message}</FormHelperText> : null}
               </FormControl>
             )}
           />
@@ -158,8 +166,8 @@ export function SignUpForm(): React.JSX.Element {
             name="email"
             render={({ field }) => (
               <FormControl error={Boolean(errors.email)}>
-                <InputLabel>邮箱</InputLabel>
-                <OutlinedInput {...field} label="Email address" type="email" />
+                <InputLabel >邮箱</InputLabel>
+                <OutlinedInput {...field} label="Email address" type="email" autoComplete="new-email"/>
                 {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
               </FormControl>
             )}
@@ -170,7 +178,7 @@ export function SignUpForm(): React.JSX.Element {
             render={({ field }) => (
               <FormControl error={Boolean(errors.password)}>
                 <InputLabel>密码</InputLabel>
-                <OutlinedInput {...field} label="Password" type="password" />
+                <OutlinedInput {...field} label="Password" type="password" autoComplete="new-password"/>
                 {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
               </FormControl>
             )}

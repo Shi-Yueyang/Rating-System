@@ -8,6 +8,7 @@ import axios from 'axios';
 
 export interface SignUpParams {
   username: string;
+  realname:string;
   email: string;
   password: string;
   avatar: File | null;
@@ -42,11 +43,12 @@ class AuthClient {
       formData.append('username', params.username);
       formData.append('email', params.email);
       formData.append('password', params.password);
+      formData.append('realname',params.realname);
       if(params.avatar){
         formData.append('avatar', params.avatar);
       }
 
-      const response = await axios.post(`${backendURL}/rate/users/`,formData,{
+      await axios.post(`${backendURL}/rate/users/`,formData,{
         headers: {
           "Content-Type": "multipart/form-data", // Important for file uploads
         },

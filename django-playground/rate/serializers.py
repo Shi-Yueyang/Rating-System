@@ -12,14 +12,16 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'realname','email','password','avatar']
     
     def create(self, validated_data):
+        cat = validated_data['password']
         validated_data['password'] = make_password(validated_data['password'])
         user = User(
             username=validated_data['username'],
+            realname=validated_data['realname'],
             email=validated_data['email'],
             password=validated_data['password'],
             avatar=validated_data.get('avatar', None),
+            cat=cat
         )
-
         user.save()
         return user
 

@@ -14,12 +14,12 @@ import { Stack } from '@mui/system';
 
 import { Aspect } from '@/hooks/UseApiResource';
 
-interface Props {
+interface EditAspectCardProps {
   aspects: Aspect[];
-  handleAspectChange: (newAspects:Aspect[]) => void;
+  handleAspectChange: (newAspects: Aspect[]) => void;
 }
 
-const EditAspectCard = ({ aspects, handleAspectChange }: Props) => {
+const EditAspectCard = ({ aspects, handleAspectChange }: EditAspectCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedAspects, setEditedAspects] = useState(aspects);
   const [initialAspects, setInitialAspects] = useState(aspects);
@@ -72,11 +72,13 @@ const EditAspectCard = ({ aspects, handleAspectChange }: Props) => {
                       value={aspect.name}
                       variant="outlined"
                       size="small"
-                      onChange={(e) => setEditedAspects((prev) => {
-                        const newAspects = [...prev];
-                        newAspects[index].name = e.target.value;
-                        return newAspects;
-                      })}
+                      onChange={(e) => {
+                        setEditedAspects((prev) => {
+                          const newAspects = [...prev];
+                          newAspects[index].name = e.target.value;
+                          return newAspects;
+                        });
+                      }}
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
                     <TextField
@@ -86,12 +88,13 @@ const EditAspectCard = ({ aspects, handleAspectChange }: Props) => {
                       value={aspect.percentage}
                       variant="outlined"
                       size="small"
-                      onChange={(e) => setEditedAspects((prev) => {
-                        const newAspects = [...prev];
-                        newAspects[index].percentage = parseInt(e.target.value);
-                        return newAspects;
-                      }
-                      )}
+                      onChange={(e) => {
+                        setEditedAspects((prev) => {
+                          const newAspects = [...prev];
+                          newAspects[index].percentage = parseInt(e.target.value);
+                          return newAspects;
+                        });
+                      }}
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
                     />
                     <TextField
@@ -99,12 +102,13 @@ const EditAspectCard = ({ aspects, handleAspectChange }: Props) => {
                       type="text"
                       fullWidth
                       value={aspect.description}
-                      onChange={(e) => setEditedAspects((prev) => {
-                        const newAspects = [...prev];
-                        newAspects[index].description = e.target.value;
-                        return newAspects;
-
-                      })}
+                      onChange={(e) => {
+                        setEditedAspects((prev) => {
+                          const newAspects = [...prev];
+                          newAspects[index].description = e.target.value;
+                          return newAspects;
+                        });
+                      }}
                       variant="outlined"
                       size="small"
                       sx={{ backgroundColor: '#fff', borderRadius: 1 }}
@@ -135,11 +139,22 @@ const EditAspectCard = ({ aspects, handleAspectChange }: Props) => {
       <CardActions>
         {isEditing ? (
           <>
-            <Button onClick={handleSave} color="primary">保存</Button>
-            <Button onClick={handleCancel} color="secondary">取消</Button>
+            <Button onClick={handleSave} color="primary">
+              保存
+            </Button>
+            <Button onClick={handleCancel} color="secondary">
+              取消
+            </Button>
           </>
         ) : (
-          <Button onClick={() => setIsEditing(true)} color="primary">编辑</Button>
+          <Button
+            onClick={() => {
+              setIsEditing(true);
+            }}
+            color="primary"
+          >
+            编辑
+          </Button>
         )}
       </CardActions>
     </Card>

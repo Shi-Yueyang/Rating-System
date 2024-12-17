@@ -13,12 +13,12 @@ import Typography from '@mui/material/Typography';
 import { useUser } from '@/hooks/use-user';
 
 
-interface Props{
+interface AccountInfoProps{
   previewUrl:string|null;
   handleFileChange:(event:React.ChangeEvent<HTMLInputElement>)=>void;
 }
 
-export function AccountInfo({previewUrl,handleFileChange}:Props): React.JSX.Element {
+export function AccountInfo({previewUrl,handleFileChange}:AccountInfoProps): React.JSX.Element {
   const { user } = useUser();
 
 
@@ -50,8 +50,6 @@ export function AccountInfo({previewUrl,handleFileChange}:Props): React.JSX.Elem
             component="span"
             variant="text"
             fullWidth
-            onClick={() => {
-            }}
           >
             上传图片
           </Button>

@@ -1,16 +1,15 @@
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import { Button, Card, CardActions, CardContent, Divider, Typography } from '@mui/material';
 
-import { Activity } from '@/hooks/UseApiResource';
+import type { Activity } from '@/hooks/UseApiResource';
 
-interface Props {
+interface ActivityCardProps {
   activity: Activity;
   onClickEdit: () => void;
   onClickView:()=>void;
 }
 
-const ActivityCard = ({ activity, onClickEdit: onClickEdit , onClickView:onClickView}: Props) => {
+const ActivityCard = ({ activity, onClickEdit: onClickEdit , onClickView:onClickView}: ActivityCardProps) => {
 
   return (
     <Card
