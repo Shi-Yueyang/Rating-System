@@ -1,5 +1,5 @@
 'use client';
-
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Box, Button, Card, CardContent, CardHeader, Grid } from '@mui/material';
@@ -47,13 +47,13 @@ export interface UserResource {
 const ActivityDetails = () => {
   // hooks
   const router = useRouter();
-  const { id: event_id } = useParams();
+  const { id: eventId } = useParams();
   const queryClient = useQueryClient();
 
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchSingleResource: useFetchSingleActivity, useMutateResources:useMutateActivity } = UseApiResources<Activity>({
-    endPoint: `${backendURL}/rate/events/`+event_id+'/',
-    queryKey: ['events', event_id.toString()],
+    endPoint: `${backendURL}/rate/events/`+eventId+'/',
+    queryKey: ['events', eventId.toString()],
     accessToken,
   });
 
@@ -65,7 +65,7 @@ const ActivityDetails = () => {
 
   const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
     endPoint: `${backendURL}/rate/user-resource/`,
-    queryKey: ['user_resources', event_id.toString()],
+    queryKey: ['user_resources', eventId.toString()],
     accessToken,
   });
   const { useMutateResources: useMutateUserResources } = UseApiResources<UserResource>({
@@ -77,13 +77,13 @@ const ActivityDetails = () => {
 
   const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
     endPoint: `${backendURL}/rate/aspects/`,
-    queryKey: ['aspects', event_id.toString()],
+    queryKey: ['aspects', eventId.toString()],
     accessToken,
   });
 
   const {useMutateResources:useMutateAspects} = UseApiResources<Aspect>({
     endPoint: `${backendURL}/rate/aspects/batch-update/`,
-    queryKey: ['aspects', event_id.toString()],
+    queryKey: ['aspects', eventId.toString()],
     accessToken,
   });
 
@@ -92,7 +92,7 @@ const ActivityDetails = () => {
   const {mutate:mutateActivity}=useMutateActivity('PATCH');
   const { useFetchResources: fetchResources } = UseApiResources<Resource>({
     endPoint: `${backendURL}/rate/resources/`,
-    queryKey: ['resources', event_id.toString()],
+    queryKey: ['resources', eventId.toString()],
     accessToken,
   });
 
@@ -101,10 +101,10 @@ const ActivityDetails = () => {
   const [aspects, setAspects] = useState<Aspect[]>();
   const [activity, setActivity] = useState<Activity>();
   const { data: activityData } = useFetchSingleActivity();
-  const { data: aspectsData } = fetchAspects({ event_id: event_id });
+  const { data: aspectsData } = fetchAspects({ event_id: eventId });
   const { data: users } = fetchUsers();
-  const { data: userResources } = fetchUserResource({ event_id: event_id });
-  const { data: resources } = fetchResources({ event_id: event_id });
+  const { data: userResources } = fetchUserResource({ event_id: eventId });
+  const { data: resources } = fetchResources({ event_id: eventId });
 
   const transformUserScoresToAssignments = (): AssignmentFile[] => {
     const assignmentMap: { [key: number]: AssignmentFile } = {};
@@ -159,7 +159,7 @@ const ActivityDetails = () => {
   const handleAspectChange = (newAspectss:Aspect[]) => {
     mutateAspect(newAspectss,{
       onSuccess:()=>{ 
-        queryClient.invalidateQueries({ queryKey: ['aspects', event_id.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['aspects', eventId.toString()] });
       } 
     });
     setAspects(newAspectss);
@@ -193,7 +193,7 @@ const ActivityDetails = () => {
     assignments.forEach((assignment, id) => {
       if (isNotResource(assignment.resource)) {
         formData.append(`newResource_${id}_resourceFile`, assignment.resource.resource_file);
-        formData.append(`newResource_${id}_event`, event_id.toString());
+        formData.append(`newResource_${id}_event`, eventId.toString());
         formData.append(`newResource_${id}_resourceName`, assignment.resource.resource_name);
       } else {
         formData.append(`oldResource_${id}_resource`, assignment.resource.id.toString());
@@ -216,8 +216,8 @@ const ActivityDetails = () => {
 
     mutateUserResources(formData, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['user_resources', event_id.toString()] });
-        queryClient.invalidateQueries({ queryKey: ['resources', event_id.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['user_resources', eventId.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['resources', eventId.toString()] });
         router.push(paths.dashboard.assignment.base);
       },
     });
@@ -231,7 +231,7 @@ const ActivityDetails = () => {
         const resource: NewResource = {
           resource_file: files[0],
           resource_name: '',
-          event: parseInt(event_id as string),
+          event: parseInt(eventId as string),
         };
         const newAssignments: AssignmentFile[] = Array.from(files).map((file) => ({ resource, users: [] as User[] }));
         setAssignments((prev) => [...prev, ...newAssignments]);

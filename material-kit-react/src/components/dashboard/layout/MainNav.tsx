@@ -17,8 +17,7 @@ export function MainNav(): React.JSX.Element {
   const [openNav, setOpenNav] = React.useState<boolean>(false);
   const {user } = useUser();
   const userPopover = usePopover<HTMLDivElement>();
-  console.log("[MainNav] user username:"+user?.username)
-  console.log("[MainNav] user avatar:"+user?.avatar)
+
   return (
     <React.Fragment>
       <Box

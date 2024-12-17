@@ -28,15 +28,15 @@ interface UserResourceFull {
   score: number;
 }
 const RatingTaskList = () => {
-  const { event_id } = useParams();
+  const { event_id: eventId } = useParams();
   const { user } = useUser();
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: useFetchUserResources } = UseApiResources<UserResourceFull>({
     endPoint:`${backendURL}/rate/user-resource/`,
-    queryKey: ['UserResource',event_id.toString(),user?.id.toString()||''],
+    queryKey: ['UserResource',eventId.toString(),user?.id.toString()||''],
     accessToken,
   });
-  const { data: userResources } = useFetchUserResources({ event_id: event_id, user_id: user?.id });
+  const { data: userResources } = useFetchUserResources({ event_id: eventId, user_id: user?.id });
   console.log(userResources);
   const router = useRouter();
   return (
@@ -64,7 +64,7 @@ const RatingTaskList = () => {
                       variant="outlined"
                       color="primary"
                       onClick={() => {
-                        router.push(paths.dashboard.rating.tasks +'/' + event_id + '/resource/' + userResource.id);
+                        router.push(paths.dashboard.rating.tasks +'/' + eventId.toString() + '/resource/' + userResource.id.toString());
                       }}
                     >
                       点评

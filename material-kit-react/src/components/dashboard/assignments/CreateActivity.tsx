@@ -1,18 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Divider, Grid, Stack, TextField, Typography } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
+import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
+
 import { backendURL } from '@/config';
 import { paths } from '@/paths';
 import { ActivityWithAspect, Aspect, UseApiResources } from '@/hooks/UseApiResource';
-import { useQueryClient } from '@tanstack/react-query';
 
 // Zod validation schema
 const schema = z.object({
@@ -38,8 +39,6 @@ const CreateActivity = () => {
     handleSubmit,
     formState: { errors },
     register,
-    setValue,
-    setError,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
@@ -65,9 +64,8 @@ const CreateActivity = () => {
 
   // Form submission handler
   const onSubmit = (data: FormData) => {
-    const aspects: Aspect[] = data.criteria.map((criterion) => ({ ...criterion } as Aspect));
-    const activityWithAspect:ActivityWithAspect = {name: data.eventName, dueDate: data.duedate ,aspects};
-
+    const aspects: Aspect[] = data.criteria.map((criterion) => ({ ...criterion }) as Aspect);
+    const activityWithAspect: ActivityWithAspect = { name: data.eventName, dueDate: data.duedate, aspects };
 
     usePostActivityWithAspect.mutate(activityWithAspect, {
       onError: (error: AxiosError) => {
@@ -82,10 +80,10 @@ const CreateActivity = () => {
             .join(';')
         );
       },
-      onSuccess:()=>{
+      onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['activities'] });
         router.push(paths.dashboard.assignment.base);
-      }
+      },
     });
   };
 
@@ -107,7 +105,7 @@ const CreateActivity = () => {
             control={control}
             name="duedate"
             rules={{ required: true }}
-            render={({ field, fieldState }) => {
+            render={({ field }) => {
               return (
                 <>
                   <DatePicker
@@ -166,18 +164,28 @@ const CreateActivity = () => {
                   </Grid>
 
                   <Grid item xs={12} container justifyContent={'center'}>
-                    <Button onClick={() => remove(index)}>删除</Button>
+                    <Button
+                      onClick={() => {
+                        remove(index);
+                      }}
+                    >
+                      删除
+                    </Button>
                   </Grid>
                 </Grid>
               </Box>
             ))}
 
             {/* Button to Add More Criteria */}
-            <Button variant="outlined" onClick={() => append({ name: '', description: '', percentage: 0 })}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                append({ name: '', description: '', percentage: 0 });
+              }}
+            >
               添加评价标准
             </Button>
             <Divider />
-
           </Stack>
 
           <Button variant="contained" color="primary" type="submit">
@@ -185,7 +193,9 @@ const CreateActivity = () => {
           </Button>
         </Stack>
       </form>
-      {usePostActivityWithAspect.isError && <Typography color="error">error: {usePostActivityWithAspect.error?.message}</Typography>}
+      {usePostActivityWithAspect.isError && (
+        <Typography color="error">error: {usePostActivityWithAspect.error?.message}</Typography>
+      )}
       {errorCreateActivity && <Typography color="error">{errorCreateActivity}</Typography>}
     </Stack>
   );

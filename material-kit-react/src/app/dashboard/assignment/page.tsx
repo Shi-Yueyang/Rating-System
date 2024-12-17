@@ -1,3 +1,4 @@
+import React from 'react';
 import { Stack, Typography } from '@mui/material';
 
 import ActivityPage from '@/components/dashboard/assignments/ActivityPage';

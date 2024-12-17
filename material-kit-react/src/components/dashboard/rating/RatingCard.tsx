@@ -2,16 +2,14 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardActions, CardContent, Divider, Typography } from '@mui/material';
 
-import { paths } from '@/paths';
 import { Activity } from '@/hooks/UseApiResource';
 
-interface Props {
+interface RatingCardProps {
   activity: Activity;
   handleClickView: () => void;
 }
 
-const RatingCard = ({ activity, handleClickView: handleClickView }: Props) => {
-  const router = useRouter();
+const RatingCard = ({ activity, handleClickView: handleClickView }: RatingCardProps) => {
 
   return (
     <Card

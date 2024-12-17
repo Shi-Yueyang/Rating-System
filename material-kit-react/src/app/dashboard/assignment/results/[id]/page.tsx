@@ -1,29 +1,30 @@
 'use client';
-import { Resource, UserResource } from '@/components/dashboard/assignments/ActivityDetails'
-import ActivityPage from '@/components/dashboard/assignments/ActivityPage'
-import ScoreList, { AspectScore, ReviewerScore, Work } from '@/components/dashboard/assignments/ResultList'
-import { StaffOrOrganizerGuard } from '@/components/dashboard/StaffOrOrganizerGuard'
-import { backendURL } from '@/config'
-import { UseApiResources } from '@/hooks/UseApiResource'
-import { User } from '@/types/user'
-import { Typography } from '@mui/material'
-import { Stack } from '@mui/system'
-import { useParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
 
-const page = () => {
-  const { id: event_id } = useParams();
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { Typography } from '@mui/material';
+import { Stack } from '@mui/system';
+
+import { User } from '@/types/user';
+import { backendURL } from '@/config';
+import { UseApiResources } from '@/hooks/UseApiResource';
+import { Resource, UserResource } from '@/components/dashboard/assignments/ActivityDetails';
+import ScoreList, { AspectScore, ReviewerScore, Work } from '@/components/dashboard/assignments/ResultList';
+import { StaffOrOrganizerGuard } from '@/components/dashboard/StaffOrOrganizerGuard';
+
+const Page = () => {
+  const { id: eventId } = useParams();
   const accessToken = localStorage.getItem('custom-auth-token');
 
   const { useFetchResources: fetchUserResource } = UseApiResources<UserResource>({
     endPoint: `${backendURL}/rate/user-resource/`,
-    queryKey: ['user_resources', event_id.toString()],
+    queryKey: ['user_resources', eventId.toString()],
     accessToken,
   });
 
   const { useFetchResources: fetchAspectsScores } = UseApiResources<AspectScore>({
     endPoint: `${backendURL}/rate/user-resource-aspect-score/`,
-    queryKey: ['user-resource-aspect-score', event_id.toString()],
+    queryKey: ['user-resource-aspect-score', eventId.toString()],
     accessToken,
   });
 
@@ -33,11 +34,13 @@ const page = () => {
     accessToken,
   });
 
-  const { data: userResources } = fetchUserResource({ event_id: event_id }) ;
-  const { data: userAspectScores } = fetchAspectsScores({ event_id: event_id });
+  const { data: userResources } = fetchUserResource({ event_id: eventId });
+  const { data: userAspectScores } = fetchAspectsScores({ event_id: eventId });
   const { data: users } = fetchUsers();
+  const [works, setWorks] = useState<Work[]>([]);
   
-  const generateWorks = (userResources: UserResource[], users: User[], userAspectScores: AspectScore[])=> {
+  // construct works
+  useEffect(() => {
     const uniqueResources: Resource[] = Array.from(
       new Map(userResources?.map((userResource) => [userResource.resource.id, userResource.resource])).values()
     );
@@ -48,9 +51,11 @@ const page = () => {
       userResources?.map((userResource) => [userResource.id, userResource.resource.id])
     );
 
-    const UserResourceIdUserIdMap = new Map(userResources?.map((userResource) => [userResource.id, userResource.user]));
+    const UserResourceIdUserIdMap = new Map(
+      userResources?.map((userResource) => [userResource.id, userResource.user])
+    );
 
-    const works: Work[] = uniqueResources.map((resource, id) => {
+    const tempWorks: Work[] = uniqueResources.map((resource, id) => {
       const relatedAspectScore =
         userAspectScores?.filter(
           (userAspectScore) => resource.id === userResourceIdResourceIdMap.get(userAspectScore.user_resource)
@@ -79,14 +84,8 @@ const page = () => {
       };
     });
 
-    return works;
-  }
-  const [works, setWorks] = useState<Work[]>([]);
-
-  useEffect(()=>{
-    setWorks(generateWorks(userResources || [], users || [], userAspectScores || []));
-
-  },[users,userResources,userAspectScores]);
+    setWorks(tempWorks);
+  }, [users, userResources, userAspectScores]);
 
   return (
     <StaffOrOrganizerGuard>
@@ -99,7 +98,7 @@ const page = () => {
         <ScoreList works={works} />
       </Stack>
     </StaffOrOrganizerGuard>
-  )
-}
+  );
+};
 
-export default page
+export default Page;

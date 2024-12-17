@@ -110,8 +110,8 @@ export function SignUpForm(): React.JSX.Element {
   );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
+    const file = event.target.files?.[0];
+    if (file) {
       setAvatarFile(file);
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
@@ -204,7 +204,7 @@ export function SignUpForm(): React.JSX.Element {
             )}
           />
 
-          {errors.root ? <Alert color="error">"注册失败"</Alert> : null}
+          {errors.root ? <Alert color="error">注册失败</Alert> : null}
           <Button disabled={isPending} type="submit" variant="contained">
             注册
           </Button>

@@ -2,7 +2,6 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardActions, CardContent, Divider, Typography } from '@mui/material';
 
-import { paths } from '@/paths';
 import { Activity } from '@/hooks/UseApiResource';
 
 interface Props {
@@ -12,7 +11,6 @@ interface Props {
 }
 
 const ActivityCard = ({ activity, onClickEdit: onClickEdit , onClickView:onClickView}: Props) => {
-  const router = useRouter();
 
   return (
     <Card

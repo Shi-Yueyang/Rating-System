@@ -1,14 +1,15 @@
 'use client';
 
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 
+import { backendURL } from '@/config';
 import { paths } from '@/paths';
 import { Activity, UseApiResources } from '@/hooks/UseApiResource';
 import ActivityCard from '@/components/dashboard/assignments/ActivityCard';
-import { backendURL } from '@/config';
 
 const ActivityPage = () => {
   const accessToken = localStorage.getItem('custom-auth-token');
@@ -31,10 +32,10 @@ const ActivityPage = () => {
             <ActivityCard
               activity={activity}
               onClickEdit={() => {
-                router.push(paths.dashboard.assignment.details+'/' + activity.id);
+                router.push(paths.dashboard.assignment.details + '/' + activity.id?.toString());
               }}
-              onClickView={()=>{
-                router.push(paths.dashboard.assignment.results+'/' + activity.id);
+              onClickView={() => {
+                router.push(paths.dashboard.assignment.results + '/' + activity.id?.toString());
               }}
             ></ActivityCard>
           </Grid>

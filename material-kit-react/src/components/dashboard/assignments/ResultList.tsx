@@ -38,11 +38,11 @@ export interface Work {
   reviewerScores: ReviewerScore[];
 }
 
-interface Props {
+interface ScoreListProps {
   works: Work[];
 }
 
-const ScoreList: React.FC<Props> = ({ works }) => {
+const ScoreList: React.FC<ScoreListProps> = ({ works }) => {
   const calculateAverageScoreOfOneReviewer = (aspectScores: AspectScore[]) => {
     if (aspectScores.length === 0) return 0;
     const sum = aspectScores.reduce((sum, aspect) => sum + aspect.score, 0);

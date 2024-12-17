@@ -2,10 +2,11 @@ import React from 'react'
 import { Box, Typography } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { CloudArrowUp } from '@phosphor-icons/react/dist/ssr/CloudArrowUp'
-
 import clsx from 'clsx'
+
 const FileUploadDefaultImage = "./sss.png";
-export type FileUploadProps = {
+
+export interface FileUploadProps  {
     imageButton?: boolean
     accept: string
     hoverLabel?: string

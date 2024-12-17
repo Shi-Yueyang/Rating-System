@@ -10,11 +10,17 @@ interface Props {
   assignments: AssignmentFile[];
   users: User[];
   handleFileNameChange: (index: number, fileName: string) => void;
-  handleFileDelete:(id:number)=>void;
+  handleFileDelete: (id: number) => void;
   handleUserChange: (assignmentId: number, selectedUsers: User[]) => void;
 }
 
-const AsignActivitiesCard = ({ assignments, users, handleFileNameChange,handleFileDelete, handleUserChange }: Props) => {
+const AsignActivitiesCard = ({
+  assignments,
+  users,
+  handleFileNameChange,
+  handleFileDelete,
+  handleUserChange,
+}: Props) => {
   return (
     <Card
       sx={{
@@ -46,7 +52,6 @@ const AsignActivitiesCard = ({ assignments, users, handleFileNameChange,handleFi
                         ? assignment.resource.resource_file.name
                         : decodeURIComponent((assignment.resource as Resource).resource_file.split('/').pop() || '')
                     }
-                    // style={{ textDecoration: 'none', color: 'inherit' }}
                   >
                     {isNotResource(assignment.resource)
                       ? assignment.resource.resource_file.name // new file
@@ -58,20 +63,30 @@ const AsignActivitiesCard = ({ assignments, users, handleFileNameChange,handleFi
                 <TextField
                   label="作品名"
                   fullWidth
-                  onChange={(e) => handleFileNameChange(index, e.target.value)}
+                  onChange={(e) => {
+                    handleFileNameChange(index, e.target.value);
+                  }}
                   value={assignment.resource.resource_name}
                 />
               </Grid>
               <Grid item xs={12}>
                 <MultiSelect
                   users={users || []}
-                  onChange={(selectedUsers) => handleUserChange(index, selectedUsers)}
+                  onChange={(selectedUsers) => {
+                    handleUserChange(index, selectedUsers);
+                  }}
                   selectedUsers={assignment.users}
                 />
               </Grid>
               {isNotResource(assignment.resource) && (
                 <Grid item xs={12}>
-                  <Button variant="outlined" color="error" onClick={() => handleFileDelete(index)}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                      handleFileDelete(index);
+                    }}
+                  >
                     删除
                   </Button>
                 </Grid>

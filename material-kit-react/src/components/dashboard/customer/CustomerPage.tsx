@@ -34,9 +34,8 @@ const CustomerPage = () => {
 
   useEffect(() => {
     if (users) {
-      const filteredUsers = users.filter(user =>{
-        if(user.realname )
-          return user.realname.includes(filter);
+      const filteredUsers = users?.filter(user =>{
+        return user.realname.includes(filter);
       });
       setPaginatedCustomers(applyPagination(filteredUsers, page, rowsPerPage));
     }

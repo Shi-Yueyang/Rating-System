@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Grid, Stack, Typography } from '@mui/material';
+import { Grid, Stack } from '@mui/material';
 
 import { paths } from '@/paths';
 import { useUser } from '@/hooks/use-user';
@@ -32,7 +32,7 @@ const RatingPage = () => {
             <RatingCard
               activity={activity}
               handleClickView={() => {
-                router.push(paths.dashboard.rating.tasks+'/' + activity.id);
+                router.push(paths.dashboard.rating.tasks+'/' + activity.id?.toString());
               }}
             ></RatingCard>
           </Grid>

@@ -2,15 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Button, Card, CardContent, CardHeader, Grid, InputLabel, TextField, Typography } from '@mui/material';
-import { backendURL } from '@/config';
-import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
-import { paths } from '@/paths';
+import { Button, Card, CardContent, Grid, InputLabel, TextField } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
+
+import { backendURL } from '@/config';
+import { paths } from '@/paths';
 import { useUser } from '@/hooks/use-user';
+import { Aspect, UseApiResources } from '@/hooks/UseApiResource';
+
 import { UserResource } from '../assignments/ActivityDetails';
-
-
 
 interface AspectScore {
   aspect: number;
@@ -21,7 +21,7 @@ const RatingDetails = () => {
   const router = useRouter();
   const { user } = useUser();
   const queryClient = useQueryClient();
-  const { event_id, userResource_id } = useParams();
+  const { event_id: eventId, userResource_id: userResourceId } = useParams();
   const accessToken = localStorage.getItem('custom-auth-token');
   const { useFetchResources: fetchAspects } = UseApiResources<Aspect>({
     endPoint: `${backendURL}/rate/aspects/`,
@@ -31,40 +31,41 @@ const RatingDetails = () => {
 
   const { useFetchResources: fetchAspectsScores } = UseApiResources<AspectScore>({
     endPoint: `${backendURL}/rate/user-resource-aspect-score/`,
-    queryKey: ['user-resource-aspect-score',userResource_id.toString()],
+    queryKey: ['user-resource-aspect-score', userResourceId.toString()],
     accessToken,
   });
 
-
   const { useMutateResources: useMutateUserResource } = UseApiResources<UserResource>({
-    endPoint: `${backendURL}/rate/user-resource/${userResource_id}/detail_update/`,
+    endPoint: `${backendURL}/rate/user-resource/${userResourceId}/detail_update/`,
     queryKey: ['null'],
     accessToken,
   });
 
   const { mutate: mutateUserResources } = useMutateUserResource('PATCH');
-  const {data:aspects} = fetchAspects({event_id:event_id});
-  const {data:aspectsScores} = fetchAspectsScores({user_resource:userResource_id});
+  const { data: aspects } = fetchAspects({ event_id: eventId });
+  const { data: aspectsScores } = fetchAspectsScores({ user_resource: userResourceId });
 
   const [ratingScore, setRatingScore] = useState<AspectScore[]>(aspectsScores || []);
 
   useEffect(() => {
     console.log(aspectsScores);
-    if(aspectsScores){
-      setRatingScore(aspectsScores.map((aspectScore) => ({
-        aspect: aspectScore.aspect,
-        score: parseFloat(aspectScore.score.toString()), // the backend always tread decimal as string
-      })));
-
-    }
-    else if(aspects){
-      setRatingScore(aspects?.map((aspect) => ({
-        aspect: aspect.id,
-        score: 0,
-      })));
+    if (aspectsScores) {
+      setRatingScore(
+        aspectsScores.map((aspectScore) => ({
+          aspect: aspectScore.aspect,
+          score: parseFloat(aspectScore.score.toString()), // the backend always tread decimal as string
+        }))
+      );
+    } else if (aspects) {
+      setRatingScore(
+        aspects?.map((aspect) => ({
+          aspect: aspect.id,
+          score: 0,
+        }))
+      );
     }
   }, [aspects]);
-  
+
   const handleInputChange = (index: number, value: number) => {
     setRatingScore((prev) => {
       const newRatingScore = [...prev];
@@ -77,20 +78,18 @@ const RatingDetails = () => {
     e.preventDefault();
     const score = ratingScore.reduce((acc, curr) => acc + curr.score, 0);
     const userResourceAspectScore = ratingScore.map((rating) => ({
-      user_resource: userResource_id,
+      user_resource: userResourceId,
       aspect: rating.aspect,
       score: rating.score,
     }));
-    const dataToSend = {totalScore: score, userResourceAspectScore};
+    const dataToSend = { totalScore: score, userResourceAspectScore };
 
-    mutateUserResources(dataToSend,{
-      onSuccess : () => {
-        queryClient.invalidateQueries({ queryKey: ['user-resource-aspect-score',userResource_id.toString()] });
-        queryClient.invalidateQueries({ queryKey:  ['UserResource',event_id.toString(),user?.id.toString()||''] });
-
-       
-        router.push(paths.dashboard.rating.tasks+'/' + event_id);
-      }
+    mutateUserResources(dataToSend, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['user-resource-aspect-score', userResourceId.toString()] });
+        queryClient.invalidateQueries({ queryKey: ['UserResource', eventId.toString(), user?.id.toString() || ''] });
+        router.push(paths.dashboard.rating.tasks + '/' + eventId);
+      },
     });
   };
   return (
@@ -104,10 +103,12 @@ const RatingDetails = () => {
                   <InputLabel>{aspect.name}</InputLabel>
                   <TextField
                     type="number"
-                    inputProps={{ min: 0, max: aspect.percentage,step:0.01 }}
+                    inputProps={{ min: 0, max: aspect.percentage, step: 0.01 }}
                     fullWidth
-                    value={ratingScore[index]?.score || ""}
-                    onChange={(e) => handleInputChange(index, Number(e.target.value))}
+                    value={ratingScore[index]?.score || ''}
+                    onChange={(e) => {
+                      handleInputChange(index, Number(e.target.value));
+                    }}
                   />
                 </Grid>
               ))}

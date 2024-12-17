@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -16,16 +16,10 @@ const VisuallyHiddenInput = styled('input')({
 
 export default function InputFileUpload() {
   return (
-    <Button
-      component="label"
-      role={undefined}
-      variant="outlined"
-      tabIndex={-1}
-    >
+    <Button component="label" role={undefined} variant="outlined" tabIndex={-1}>
       上传作品文件
       <VisuallyHiddenInput
         type="file"
-        onChange={(event) => console.log(event.target.files)}
         multiple
       />
     </Button>

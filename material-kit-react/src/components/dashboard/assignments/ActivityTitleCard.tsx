@@ -86,7 +86,7 @@ const ActivityTitleCard = ({ activity, handleActivityChange }: Props) => {
             <Button onClick={handleCancel} color="secondary">取消</Button>
           </>
         ) : (
-          <Button onClick={() => setIsEditing(true)} color="primary">编辑</Button>
+          <Button onClick={() => {setIsEditing(true);}} color="primary">编辑</Button>
         )}
       </CardActions>
     </Card>

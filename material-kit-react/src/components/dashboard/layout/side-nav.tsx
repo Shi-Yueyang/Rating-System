@@ -20,7 +20,7 @@ import { useUser } from '@/hooks/use-user';
 export function SideNav(): React.JSX.Element {
   const pathname = usePathname();
   const { user } = useUser();
-  const is_staff_or_org = user?.is_staff || user?.groups?.includes('Organizer');
+  const isStaffOrOrg = user?.is_staff || user?.groups?.includes('Organizer');
 
 
   return (
@@ -59,7 +59,7 @@ export function SideNav(): React.JSX.Element {
       
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
-        {renderNavItems({ pathname, items: is_staff_or_org ? staffNavItems : userNavItems })}
+        {renderNavItems({ pathname, items: isStaffOrOrg ? staffNavItems : userNavItems })}
       </Box>
 
     </Box>

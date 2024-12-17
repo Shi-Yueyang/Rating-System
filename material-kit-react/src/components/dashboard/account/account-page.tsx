@@ -11,8 +11,8 @@ const AccountPage = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
+    const file = event.target.files?.[0];
+    if (file) {
       setAvatarFile(file);
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);

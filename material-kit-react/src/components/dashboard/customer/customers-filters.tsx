@@ -4,17 +4,19 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 
-interface Props{
-  onFilterChange:(value:string)=>void;
+interface CustomersFiltersProps {
+  onFilterChange: (value: string) => void;
 }
 
-export function CustomersFilters({onFilterChange}:Props) {
+export function CustomersFilters({ onFilterChange }: CustomersFiltersProps) {
   return (
     <Card sx={{ p: 2 }}>
       <OutlinedInput
         defaultValue=""
         fullWidth
-        onChange={(e) => onFilterChange(e.target.value)}
+        onChange={(e) => {
+          onFilterChange(e.target.value);
+        }}
         placeholder="搜索用户"
         startAdornment={
           <InputAdornment position="start">

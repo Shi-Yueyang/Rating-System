@@ -25,7 +25,6 @@ async function fetchData<T>(
   headers: Record<string, string>,
   params?: Record<string, any>
 ): Promise<T[]> {
-  console.log('fetchData:', endPoint, headers, params);
   const response = await axios.get(endPoint, { headers, params });
   return response.data;
 }
@@ -54,14 +53,14 @@ async function mutateData(endPoint: string, data: any, config: AxiosRequestConfi
   }
 }
 
-interface Props {
+interface UseApiResourcesProps {
   endPoint: string;
   accessToken?: string | null;
   queryKey: string[];
   contentType?: 'application/json' | 'multipart/form-data';
 }
 
-export function UseApiResources<T>({ endPoint, accessToken, queryKey = [], contentType = 'application/json' }: Props) {
+export function UseApiResources<T>({ endPoint, accessToken, queryKey = [], contentType = 'application/json' }: UseApiResourcesProps) {
   const headers: Record<string, string> = {
     'Content-Type': contentType,
   };
