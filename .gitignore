@@ -19,7 +19,7 @@ out
 .idea
 **/.env
 **/.env.production
-
+.env
 
 npm-debug.log*
 yarn-debug.log*
