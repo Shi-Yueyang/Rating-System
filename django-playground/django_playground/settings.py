@@ -31,7 +31,8 @@ SECRET_KEY = 'django-insecure-xszba6)oistrmz(e58uyvc4=0+w$$5!f-kld@j^ps*1xs2s)@%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
 
 AUTH_USER_MODEL ="core.CustomUser"
 # Application definition
