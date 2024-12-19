@@ -12,7 +12,7 @@ node_modules/
 /build
 out
 .next
-
+**/media/
 # misc
 .DS_Store
 .eslintcache
