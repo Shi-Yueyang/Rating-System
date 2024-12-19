@@ -18,6 +18,7 @@ out
 .eslintcache
 .idea
 **/**.sqlite3
+**/**.**db
 **/.env
 **/.env.production
 .env
